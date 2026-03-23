@@ -14,7 +14,7 @@ except ImportError:  # pragma: no cover - exercised in sklearn-only environments
 
 try:
     from sklearn.base import BaseEstimator, TransformerMixin
-except Exception:  # pragma: no cover - fallback when sklearn is unavailable
+except ImportError:  # pragma: no cover - fallback when sklearn is unavailable
     class BaseEstimator:  # type: ignore[no-redef]
         pass
 
@@ -157,7 +157,7 @@ class EctTransformer(BaseEstimator, TransformerMixin):
             batch_np = np.zeros(x_np.shape[0], dtype=np.int64)
 
         nh_np = (x_np @ self._v_).astype(np.float32, copy=False)
-        dim_size = int(batch_np.max()) + 1 if batch_np.size else 1
+        dim_size = 1 if batch_np.size == 0 else int(batch_np.max()) + 1
 
         if self.ect_type == "points":
             ect = _dect_backend.compute_ect_points_forward(
