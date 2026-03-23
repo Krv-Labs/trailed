@@ -36,24 +36,17 @@ maturin develop
 
 ## Testing & Verification
 
-To verify that the Rust implementation matches the original Python version:
+To verify that the Rust implementation matches the original Python version and see the performance speedup:
 
 ```bash
 # Install test dependencies
 uv sync --group tests
 
-# Run all tests (includes compare and benchmark smoke tests)
-uv run pytest -q tests
-
-# Run only comparison tests
-uv run pytest -q tests/compare.py
-
-# Run only benchmark smoke tests
-uv run pytest -q tests/benchmark.py
+# Run all tests and see the benchmark table
+uv run pytest -s tests/test_dect.py
 ```
 
-The pytest configuration is defined in `pyproject.toml` and explicitly includes
-`tests/compare.py` and `tests/benchmark.py` for test discovery.
+`pytest -s` is required to display the wall-clock comparison table in the console.
 
 ## Usage
 
