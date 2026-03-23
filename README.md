@@ -76,3 +76,40 @@ ect = layer(data)
 ect.sum().backward()
 print(x.grad)
 ```
+
+### sklearn transformer usage
+
+`DECT` also exposes an sklearn-compatible transformer API for classical ML
+pipelines:
+
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.linear_model import LogisticRegression
+from dect import EctTransformer
+
+# `graphs` should be an iterable of graph-like objects with at least `.x`
+# (and for edges/faces modes, `.edge_index` / `.face`).
+graphs = [...]
+y = np.array([...])
+
+pipe = Pipeline(
+    [
+        (
+            "ect",
+            EctTransformer(
+                ect_type="points",
+                num_thetas=16,
+                bump_steps=16,
+                num_features=3,
+                normalized=True,
+                random_state=0,
+            ),
+        ),
+        ("clf", LogisticRegression(max_iter=200)),
+    ]
+)
+
+pipe.fit(graphs, y)
+features = pipe.named_steps["ect"].transform(graphs)  # shape: (n_samples, bump_steps * num_thetas)
+```

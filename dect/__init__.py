@@ -1,3 +1,3 @@
-from .ect import EctConfig, EctLayer
+from .ect import EctConfig, EctLayer, EctTransformer, SklearnEctConfig
 
-__all__ = ["EctConfig", "EctLayer"]
+__all__ = ["EctConfig", "EctLayer", "SklearnEctConfig", "EctTransformer"]
