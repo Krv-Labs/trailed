@@ -1,0 +1,26 @@
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "dect-rust"
+version = "0.1.0"
+description = "A fast package to compute the Euler Characteristic Transform in Rust"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "torch",
+    "torch_geometric"
+]
+
+[dependency-groups]
+tests = [
+    "dect @ git+https://github.com/aidos-lab/DECT/",
+    "pytest",
+    "pytest-cov",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "compare.py", "benchmark.py"]
