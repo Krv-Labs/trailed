@@ -5,38 +5,64 @@ A fast Rust-based implementation of the ECT with Python bindings
 for point clouds, graphs, and meshes.
 """
 
-from .torch_layer import (
-    EctConfig,
-    EctLayer,
-    FastEctLayer,
-    EctPointsFunction,
-    EctPointsDerivativeFunction,
-    EctEdgesFunction,
-    EctFacesFunction,
-    EctChannelsFunction,
-    compute_ect,
+# Import from submodules for backward compatibility
+from .sampling import (
     generate_directions,
+    generate_uniform_directions,
+    generate_2d_directions,
+    generate_multiview_directions,
+    generate_spherical_grid_directions,
+    normalize_directions,
+    compute_node_heights,
+    generate_lin,
 )
 
 __all__ = [
-    # Configuration
-    "EctConfig",
-    # PyTorch layers
-    "EctLayer",
-    "FastEctLayer",
-    # Autograd functions
-    "EctPointsFunction",
-    "EctPointsDerivativeFunction",
-    "EctEdgesFunction",
-    "EctFacesFunction",
-    "EctChannelsFunction",
-    # Functional interface
-    "compute_ect",
+    # Sampling/directions
     "generate_directions",
+    "generate_uniform_directions",
+    "generate_2d_directions",
+    "generate_multiview_directions",
+    "generate_spherical_grid_directions",
+    "normalize_directions",
+    "compute_node_heights",
+    "generate_lin",
 ]
 
+# Conditionally import PyTorch components
 try:
-    from .sklearn import (
+    from .plugins.torch import (
+        EctConfig,
+        EctLayer,
+        FastEctLayer,
+        EctPointsFunction,
+        EctPointsDerivativeFunction,
+        EctEdgesFunction,
+        EctFacesFunction,
+        EctChannelsFunction,
+        compute_ect,
+    )
+    __all__.extend([
+        # Configuration
+        "EctConfig",
+        # PyTorch layers
+        "EctLayer",
+        "FastEctLayer",
+        # Autograd functions
+        "EctPointsFunction",
+        "EctPointsDerivativeFunction",
+        "EctEdgesFunction",
+        "EctFacesFunction",
+        "EctChannelsFunction",
+        # Functional interface
+        "compute_ect",
+    ])
+except ImportError:
+    pass
+
+# Conditionally import sklearn components
+try:
+    from .plugins.sklearn import (
         EctTransformer,
         FastEctTransformer,
         EctChannelTransformer,
@@ -49,8 +75,9 @@ try:
 except ImportError:
     pass
 
+# Conditionally import DataFrame components
 try:
-    from .dataframe import (
+    from .tabular import (
         compute_ect_from_numpy,
         compute_ect_from_pandas,
         compute_ect_from_polars,
