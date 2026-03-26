@@ -1,9 +1,8 @@
+from dataclasses import dataclass
+
 import torch
 import torch.nn as nn
-from torch_geometric.data import Data
 
-from typing import Protocol
-from dataclasses import dataclass
 import dect
 
 
@@ -24,9 +23,7 @@ class EctPointsFunction(torch.autograd.Function):
         nh_np = nh.detach().cpu().numpy()
         batch_np = batch.detach().cpu().numpy()
         lin_np = lin.detach().cpu().numpy().flatten()
-        out_np = dect.compute_ect_points_forward(
-            nh_np, batch_np, lin_np, dim_size
-        )
+        out_np = dect.compute_ect_points_forward(nh_np, batch_np, lin_np, dim_size)
         ctx.save_for_backward(nh, batch, lin)
         return torch.from_numpy(out_np).to(nh.device)
 
@@ -172,9 +169,7 @@ class EctLayer(nn.Module):
         elif self.config.ect_type == "faces":
             edge_index = data.edge_index.contiguous()
             face = data.face.contiguous()
-            ect = EctFacesFunction.apply(
-                nh, batch, edge_index, face, lin, dim_size
-            )
+            ect = EctFacesFunction.apply(nh, batch, edge_index, face, lin, dim_size)
         else:
             raise ValueError(f"Unknown ect_type: {self.config.ect_type}")
 

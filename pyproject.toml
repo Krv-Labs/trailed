@@ -9,18 +9,47 @@ description = "A fast package to compute the Euler Characteristic Transform in R
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "numpy",
-    "torch",
-    "torch_geometric"
+    "numpy>=1.20",
+]
+
+[project.optional-dependencies]
+torch = [
+    "torch>=2.0",
+]
+torch-geometric = [
+    "torch>=2.0",
+    "torch_geometric>=2.0",
+]
+sklearn = [
+    "scikit-learn>=1.0",
+]
+dataframe = [
+    "pandas>=1.5",
+    "polars>=0.20",
+]
+all = [
+    "torch>=2.0",
+    "torch_geometric>=2.0",
+    "scikit-learn>=1.0",
+    "pandas>=1.5",
+    "polars>=0.20",
 ]
 
 [dependency-groups]
+dev = [
+    "ruff>=0.15.7",
+]
 tests = [
     "dect @ git+https://github.com/aidos-lab/DECT/",
     "pytest",
     "pytest-cov",
+    "torch>=2.0",
+    "scikit-learn>=1.0",
 ]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py", "compare.py", "benchmark.py"]
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
