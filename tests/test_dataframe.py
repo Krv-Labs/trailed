@@ -200,7 +200,7 @@ class TestEctToDataframe:
         assert df.shape == (5, 64)
 
     def test_with_group_ids(self):
-        pd = pytest.importorskip("pandas")
+        pytest.importorskip("pandas")
         from dect.tabular import ect_to_dataframe
 
         ect = np.random.randn(5, 8, 8).astype(np.float32)
