@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from dect.dataframe import compute_ect_from_numpy
+from dect.tabular import compute_ect_from_numpy
 
 
 class TestComputeEctFromNumpy:
@@ -97,7 +97,7 @@ class TestPandasIntegration:
         })
     
     def test_compute_ect_from_pandas(self, df):
-        from dect.dataframe import compute_ect_from_pandas
+        from dect.tabular import compute_ect_from_pandas
         
         ect = compute_ect_from_pandas(
             df,
@@ -109,7 +109,7 @@ class TestPandasIntegration:
         assert ect.shape == (16, 16)
     
     def test_compute_ect_from_pandas_grouped(self, df):
-        from dect.dataframe import compute_ect_from_pandas
+        from dect.tabular import compute_ect_from_pandas
         
         ect = compute_ect_from_pandas(
             df,
@@ -122,7 +122,7 @@ class TestPandasIntegration:
         assert ect.shape == (10, 16, 16)
     
     def test_compute_ect_from_pandas_with_channels(self, df):
-        from dect.dataframe import compute_ect_from_pandas
+        from dect.tabular import compute_ect_from_pandas
         
         ect = compute_ect_from_pandas(
             df,
@@ -149,7 +149,7 @@ class TestPolarsIntegration:
         })
     
     def test_compute_ect_from_polars(self, df):
-        from dect.dataframe import compute_ect_from_polars
+        from dect.tabular import compute_ect_from_polars
         
         ect = compute_ect_from_polars(
             df,
@@ -161,7 +161,7 @@ class TestPolarsIntegration:
         assert ect.shape == (16, 16)
     
     def test_compute_ect_from_polars_grouped(self, df):
-        from dect.dataframe import compute_ect_from_polars
+        from dect.tabular import compute_ect_from_polars
         
         ect = compute_ect_from_polars(
             df,
@@ -177,7 +177,7 @@ class TestPolarsIntegration:
 class TestEctToDataframe:
     def test_to_pandas(self):
         pd = pytest.importorskip("pandas")
-        from dect.dataframe import ect_to_dataframe
+        from dect.tabular import ect_to_dataframe
         
         ect = np.random.randn(5, 8, 8).astype(np.float32)
         df = ect_to_dataframe(ect, as_polars=False)
@@ -187,7 +187,7 @@ class TestEctToDataframe:
     
     def test_to_polars(self):
         pl = pytest.importorskip("polars")
-        from dect.dataframe import ect_to_dataframe
+        from dect.tabular import ect_to_dataframe
         
         ect = np.random.randn(5, 8, 8).astype(np.float32)
         df = ect_to_dataframe(ect, as_polars=True)
@@ -197,7 +197,7 @@ class TestEctToDataframe:
     
     def test_with_group_ids(self):
         pd = pytest.importorskip("pandas")
-        from dect.dataframe import ect_to_dataframe
+        from dect.tabular import ect_to_dataframe
         
         ect = np.random.randn(5, 8, 8).astype(np.float32)
         group_ids = ["A", "B", "C", "D", "E"]
@@ -209,7 +209,7 @@ class TestEctToDataframe:
 class TestDataFrameEctTransformer:
     def test_pandas(self):
         pd = pytest.importorskip("pandas")
-        from dect.dataframe import DataFrameEctTransformer
+        from dect.tabular import DataFrameEctTransformer
         
         df = pd.DataFrame({
             "x": np.random.randn(100),
@@ -232,7 +232,7 @@ class TestDataFrameEctTransformer:
     
     def test_output_format_pandas(self):
         pd = pytest.importorskip("pandas")
-        from dect.dataframe import DataFrameEctTransformer
+        from dect.tabular import DataFrameEctTransformer
         
         df = pd.DataFrame({
             "x": np.random.randn(100),

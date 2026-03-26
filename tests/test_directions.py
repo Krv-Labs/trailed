@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 import dect_rust
-from dect.directions import (
+from dect.sampling import (
     generate_uniform_directions,
     generate_2d_directions,
     generate_multiview_directions,

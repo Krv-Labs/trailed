@@ -5,7 +5,7 @@ import pytest
 
 torch = pytest.importorskip("torch")
 
-from dect.torch_layer import (
+from dect.plugins.torch import (
     EctConfig,
     EctLayer,
     FastEctLayer,
