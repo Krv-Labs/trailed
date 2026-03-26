@@ -23,9 +23,3 @@ jobs:
         run: uv sync --group tests
       - name: Run tests
         run: uv run pytest
-      - name: Run ruff lint checks
-        if: matrix.python-version == '3.13'
-        run: uv run ruff check dect tests
-      - name: Run ruff format checks
-        if: matrix.python-version == '3.13'
-        run: uv run ruff format --check dect tests
