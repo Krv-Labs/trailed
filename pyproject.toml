@@ -36,13 +36,16 @@ all = [
 ]
 
 [dependency-groups]
-dev = [
+tests = [
     "ruff>=0.15.7",
     "dect @ git+https://github.com/aidos-lab/DECT/",
+    "pandas>=1.5",
+    "polars",
     "pytest",
     "pytest-cov",
     "torch>=2.0",
     "scikit-learn>=1.0",
+    "torch-geometric>=2.7.0",
 ]
 
 [tool.pytest.ini_options]

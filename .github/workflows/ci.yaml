@@ -20,7 +20,7 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
       - name: Install dependencies
-        run: uv sync --group dev
+        run: uv sync --group tests
       - name: Run tests
         run: uv run pytest
       - name: Run ruff formatting checks
