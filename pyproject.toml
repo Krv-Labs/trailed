@@ -38,8 +38,6 @@ all = [
 [dependency-groups]
 dev = [
     "ruff>=0.15.7",
-]
-tests = [
     "dect @ git+https://github.com/aidos-lab/DECT/",
     "pytest",
     "pytest-cov",
