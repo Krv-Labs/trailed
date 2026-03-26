@@ -1,71 +1,67 @@
-# DECT (Differentiable Euler Characteristic Transform) - Rust Port
+# DECT
 
-This is a Rust implementation of the Differentiable Euler Characteristic Transform (DECT), providing a fast and memory-efficient alternative to the original Python/PyTorch implementation.
+A high-performance Rust implementation of the Differentiable Euler Characteristic Transform (DECT), exposed through ergonomic Python bindings.
 
 ## Features
 
-- **Rust Backend**: Core computations (Points, Edges, Faces) are implemented in Rust using `ndarray` for performance.
-- **Differentiable**: Custom `torch.autograd.Function` wrappers provide seamless integration with PyTorch's automatic differentiation.
-- **Pythonic Interface**: Maintains the same API as the original implementation.
+- Fast Rust core for DECT computation.
+- Native Python API for NumPy workflows.
+- Optional integrations for scikit-learn, PyTorch, and dataframe libraries.
 
 ## Installation
 
-### Prerequisites
-
-- Rust (Cargo)
-- Python 3.10+
-- PyTorch and Torch Geometric
-
-### Build from Source
-
-From the `DECT/` directory:
-
 ```bash
-# Create/update the virtual environment and install runtime deps
-uv sync
-
-# Build and install the local package in editable mode
 uv pip install -e .
 
-# (Optional) install test dependencies, including the upstream dect package
-uv sync --group tests
-
-# Or use maturin directly for development
-maturin develop
+# Optional extras
+pip install dect-rust[sklearn]      # scikit-learn transformers
+pip install dect-rust[torch]        # PyTorch layers
+pip install dect-rust[dataframe]    # pandas + polars
+pip install dect-rust[all]          # all optional dependencies
 ```
 
-## Testing & Verification
-
-To verify that the Rust implementation matches the original Python version and see the performance speedup:
-
-```bash
-# Install test dependencies
-uv sync --group tests
-
-# Run all tests and see the benchmark table
-uv run pytest -s tests/test_dect.py
-```
-
-`pytest -s` is required to display the wall-clock comparison table in the console.
-
-## Usage
+## Quick Start
 
 ```python
-import torch
+# NumPy
+from dect import compute_ect_from_numpy
+
+ect = compute_ect_from_numpy(points, num_thetas=32, resolution=32)
+
+# Scikit-learn
+from dect import EctTransformer
+
+transformer = EctTransformer(num_thetas=32, resolution=32)
+features = transformer.fit_transform(X)  # X: (n_samples, n_points, n_dims)
+
+# PyTorch
 from dect import EctConfig, EctLayer
-from torch_geometric.data import Data
 
-config = EctConfig(ect_type="faces")
-layer = EctLayer(config)
+layer = EctLayer(EctConfig(num_thetas=32, bump_steps=32))
+ect = layer(data)  # torch_geometric Data
+```
 
-# Example data
-x = torch.randn(10, 3, requires_grad=True)
-edge_index = torch.tensor([[0, 1], [1, 2]], dtype=torch.long)
-face = torch.tensor([[0], [1], [2]], dtype=torch.long)
-batch = torch.zeros(10, dtype=torch.long)
+## Running Tests
 
-data = Data(x=x, edge_index=edge_index, face=face, batch=batch)
-ect = layer(data)
-ect.sum().backward()
-print(x.grad)
+```bash
+uv sync --group tests
+uv run pytest
+```
+
+## Acknowledgment
+
+This project builds on the original [dect](https://github.com/aidos-lab/dect) implementation and accompanying research.
+
+```bibtex
+@inproceedings{Roell24a,
+  title         = {Differentiable Euler Characteristic Transforms for Shape Classification},
+  author        = {Ernst R{\"o}ell and Bastian Rieck},
+  year          = 2024,
+  booktitle     = {International Conference on Learning Representations},
+  eprint        = {2310.07630},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.LG},
+  repository    = {https://github.com/aidos-lab/dect-evaluation},
+  url           = {https://openreview.net/forum?id=MO632iPq3I},
+}
 ```
