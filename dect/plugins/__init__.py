@@ -15,11 +15,14 @@ try:
         FastEctTransformer,
         EctChannelTransformer,
     )
-    __all__.extend([
-        "EctTransformer",
-        "FastEctTransformer",
-        "EctChannelTransformer",
-    ])
+
+    __all__.extend(
+        [
+            "EctTransformer",
+            "FastEctTransformer",
+            "EctChannelTransformer",
+        ]
+    )
 except ImportError:
     pass
 
@@ -37,17 +40,20 @@ try:
         compute_ect,
         generate_directions,
     )
-    __all__.extend([
-        "EctConfig",
-        "EctLayer",
-        "FastEctLayer",
-        "EctPointsFunction",
-        "EctPointsDerivativeFunction",
-        "EctEdgesFunction",
-        "EctFacesFunction",
-        "EctChannelsFunction",
-        "compute_ect",
-        "generate_directions",
-    ])
+
+    __all__.extend(
+        [
+            "EctConfig",
+            "EctLayer",
+            "FastEctLayer",
+            "EctPointsFunction",
+            "EctPointsDerivativeFunction",
+            "EctEdgesFunction",
+            "EctFacesFunction",
+            "EctChannelsFunction",
+            "compute_ect",
+            "generate_directions",
+        ]
+    )
 except ImportError:
     pass

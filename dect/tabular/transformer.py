@@ -7,7 +7,6 @@ with a consistent interface supporting both pandas and polars.
 
 from typing import Literal, List, Optional, Union
 
-import numpy as np
 from numpy.typing import NDArray
 
 import dect_rust
@@ -28,10 +27,10 @@ except ImportError:
 
 class DataFrameEctTransformer:
     """DataFrame-native ECT transformer.
-    
+
     This class provides a consistent interface for computing ECT from
     DataFrames, supporting both pandas and polars.
-    
+
     Parameters
     ----------
     coord_columns : list of str
@@ -58,7 +57,7 @@ class DataFrameEctTransformer:
         Whether to use parallel computation.
     output_format : str, default="numpy"
         Output format: "numpy", "pandas", or "polars".
-    
+
     Examples
     --------
     >>> import pandas as pd
@@ -77,7 +76,7 @@ class DataFrameEctTransformer:
     ... )
     >>> ect = transformer.transform(df)
     """
-    
+
     def __init__(
         self,
         coord_columns: List[str],
@@ -105,18 +104,20 @@ class DataFrameEctTransformer:
         self.normalized = normalized
         self.parallel = parallel
         self.output_format = output_format
-        
+
         self.directions_: Optional[NDArray] = None
         self._lin: Optional[NDArray] = None
-    
-    def fit(self, df: Union["pd.DataFrame", "pl.DataFrame"]) -> "DataFrameEctTransformer":
+
+    def fit(
+        self, df: Union["pd.DataFrame", "pl.DataFrame"]
+    ) -> "DataFrameEctTransformer":
         """Fit the transformer by generating directions.
-        
+
         Parameters
         ----------
         df : DataFrame
             Sample DataFrame to infer dimensions from.
-        
+
         Returns
         -------
         self
@@ -127,18 +128,18 @@ class DataFrameEctTransformer:
         )
         self._lin = dect_rust.generate_lin(self.radius, self.resolution)
         return self
-    
+
     def transform(
         self,
         df: Union["pd.DataFrame", "pl.DataFrame"],
     ) -> Union[NDArray, "pd.DataFrame", "pl.DataFrame"]:
         """Transform DataFrame to ECT features.
-        
+
         Parameters
         ----------
         df : DataFrame
             DataFrame containing point cloud data.
-        
+
         Returns
         -------
         result : ndarray or DataFrame
@@ -146,7 +147,7 @@ class DataFrameEctTransformer:
         """
         if self.directions_ is None:
             self.fit(df)
-        
+
         ect = compute_ect_from_dataframe(
             df,
             coord_columns=self.coord_columns,
@@ -161,7 +162,7 @@ class DataFrameEctTransformer:
             normalized=self.normalized,
             parallel=self.parallel,
         )
-        
+
         if self.output_format == "numpy":
             return ect
         elif self.output_format == "pandas":
@@ -170,7 +171,7 @@ class DataFrameEctTransformer:
             return ect_to_dataframe(ect, as_polars=True)
         else:
             raise ValueError(f"Unknown output format: {self.output_format}")
-    
+
     def fit_transform(
         self,
         df: Union["pd.DataFrame", "pl.DataFrame"],

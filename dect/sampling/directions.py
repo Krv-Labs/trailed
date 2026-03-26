@@ -5,7 +5,7 @@ This module provides Python wrappers for the Rust direction generation
 functions, with additional convenience features.
 """
 
-from typing import Literal, Optional
+from typing import Literal
 
 import numpy as np
 from numpy.typing import NDArray
@@ -19,10 +19,10 @@ def generate_uniform_directions(
     seed: int = 42,
 ) -> NDArray:
     """Generate randomly sampled directions from a sphere.
-    
+
     Samples points from a standard normal distribution and projects them
     onto the unit sphere to obtain uniformly distributed directions.
-    
+
     Parameters
     ----------
     num_thetas : int
@@ -31,12 +31,12 @@ def generate_uniform_directions(
         Dimension of the ambient space.
     seed : int, default=42
         Random seed for reproducibility.
-    
+
     Returns
     -------
     directions : ndarray of shape (ambient_dim, num_thetas)
         Unit vectors representing directions.
-    
+
     Examples
     --------
     >>> from dect.sampling import generate_uniform_directions
@@ -51,20 +51,20 @@ def generate_uniform_directions(
 
 def generate_2d_directions(num_thetas: int) -> NDArray:
     """Generate structured directions along the 2D unit circle.
-    
+
     Divides the interval [0, 2*pi) into equal parts and returns the
     corresponding points on the unit circle.
-    
+
     Parameters
     ----------
     num_thetas : int
         Number of directions to generate.
-    
+
     Returns
     -------
     directions : ndarray of shape (2, num_thetas)
         Unit vectors representing directions.
-    
+
     Examples
     --------
     >>> from dect.sampling import generate_2d_directions
@@ -80,23 +80,23 @@ def generate_multiview_directions(
     ambient_dim: int,
 ) -> NDArray:
     """Generate structured directions in multiple 2D planes.
-    
+
     Generates directions by embedding the 2D unit circle in the d-dimensional
     space along each pair of coordinate axes. This produces (d choose 2)
     sets of structured directions.
-    
+
     Parameters
     ----------
     num_thetas : int
         Total number of directions to generate.
     ambient_dim : int
         Dimension of the ambient space.
-    
+
     Returns
     -------
     directions : ndarray of shape (ambient_dim, num_thetas)
         Unit vectors representing directions.
-    
+
     Examples
     --------
     >>> from dect.sampling import generate_multiview_directions
@@ -112,23 +112,23 @@ def generate_spherical_grid_directions(
     num_phis: int,
 ) -> NDArray:
     """Generate directions on a spherical grid (3D only).
-    
+
     Creates a grid of directions on the unit sphere using latitude-longitude
     parameterization. The polar angle theta ranges from 0 to pi, and the
     azimuthal angle phi ranges from 0 to 2*pi.
-    
+
     Parameters
     ----------
     num_thetas : int
         Number of polar angle samples.
     num_phis : int
         Number of azimuthal angle samples.
-    
+
     Returns
     -------
     directions : ndarray of shape (3, num_thetas * num_phis)
         Unit vectors representing directions.
-    
+
     Examples
     --------
     >>> from dect.sampling import generate_spherical_grid_directions
@@ -142,14 +142,16 @@ def generate_spherical_grid_directions(
 def generate_directions(
     num_thetas: int,
     ambient_dim: int,
-    method: Literal["uniform", "structured_2d", "multiview", "spherical_grid"] = "uniform",
+    method: Literal[
+        "uniform", "structured_2d", "multiview", "spherical_grid"
+    ] = "uniform",
     seed: int = 42,
 ) -> NDArray:
     """Generate direction vectors using the specified method.
-    
+
     This is a convenience function that dispatches to the appropriate
     direction generation function based on the method parameter.
-    
+
     Parameters
     ----------
     num_thetas : int
@@ -165,12 +167,12 @@ def generate_directions(
         - "spherical_grid": Lat/lon grid on sphere (requires ambient_dim=3)
     seed : int, default=42
         Random seed (only used for "uniform" method).
-    
+
     Returns
     -------
     directions : ndarray of shape (ambient_dim, num_directions)
         Unit vectors representing directions.
-    
+
     Examples
     --------
     >>> from dect.sampling import generate_directions
@@ -201,12 +203,12 @@ def generate_directions(
 
 def normalize_directions(v: NDArray) -> NDArray:
     """Normalize direction vectors to unit length.
-    
+
     Parameters
     ----------
     v : ndarray of shape (d, n)
         Direction vectors.
-    
+
     Returns
     -------
     normalized : ndarray of shape (d, n)
@@ -221,14 +223,14 @@ def compute_node_heights(
     v: NDArray,
 ) -> NDArray:
     """Compute node heights (projections onto directions).
-    
+
     Parameters
     ----------
     x : ndarray of shape (n_points, d)
         Point coordinates.
     v : ndarray of shape (d, n_directions)
         Direction vectors.
-    
+
     Returns
     -------
     heights : ndarray of shape (n_points, n_directions)
@@ -242,14 +244,14 @@ def compute_node_heights(
 
 def generate_lin(radius: float, resolution: int) -> NDArray:
     """Generate linear threshold values.
-    
+
     Parameters
     ----------
     radius : float
         Radius of the interval [-radius, radius].
     resolution : int
         Number of threshold steps.
-    
+
     Returns
     -------
     lin : ndarray of shape (resolution,)

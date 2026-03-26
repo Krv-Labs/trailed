@@ -13,6 +13,7 @@ from .core import compute_ect_from_numpy
 
 try:
     import polars as pl
+
     HAS_POLARS = True
 except ImportError:
     HAS_POLARS = False
@@ -34,7 +35,7 @@ def compute_ect_from_polars(
     parallel: bool = True,
 ) -> NDArray:
     """Compute ECT from a polars DataFrame.
-    
+
     Parameters
     ----------
     df : pl.DataFrame
@@ -61,12 +62,12 @@ def compute_ect_from_polars(
         Whether to normalize the ECT.
     parallel : bool, default=True
         Whether to use parallel computation.
-    
+
     Returns
     -------
     ect : ndarray
         ECT features.
-    
+
     Examples
     --------
     >>> import polars as pl
@@ -84,11 +85,13 @@ def compute_ect_from_polars(
     ... )
     """
     if not HAS_POLARS:
-        raise ImportError("polars is required for this function. Install with: pip install polars")
-    
+        raise ImportError(
+            "polars is required for this function. Install with: pip install polars"
+        )
+
     # Extract coordinates
     points = df.select(coord_columns).to_numpy().astype(np.float32)
-    
+
     # Extract group IDs
     group_ids = None
     if group_column is not None:
@@ -96,10 +99,9 @@ def compute_ect_from_polars(
         unique_groups = group_series.unique().sort()
         group_map = {g: i for i, g in enumerate(unique_groups.to_list())}
         group_ids = np.array(
-            [group_map[g] for g in group_series.to_list()],
-            dtype=np.int64
+            [group_map[g] for g in group_series.to_list()], dtype=np.int64
         )
-    
+
     # Extract channel IDs
     channel_ids = None
     if channel_column is not None:
@@ -107,10 +109,9 @@ def compute_ect_from_polars(
         unique_channels = channel_series.unique().sort()
         channel_map = {c: i for i, c in enumerate(unique_channels.to_list())}
         channel_ids = np.array(
-            [channel_map[c] for c in channel_series.to_list()],
-            dtype=np.int64
+            [channel_map[c] for c in channel_series.to_list()], dtype=np.int64
         )
-    
+
     return compute_ect_from_numpy(
         points=points,
         group_ids=group_ids,

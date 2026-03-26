@@ -28,9 +28,7 @@ def _make_data(ect_type: str, num_nodes: int, num_features: int) -> Data:
     return data
 
 
-@pytest.mark.parametrize(
-    "ect_type", ["points", "points_derivative", "edges", "faces"]
-)
+@pytest.mark.parametrize("ect_type", ["points", "points_derivative", "edges", "faces"])
 def test_forward_and_backward_are_finite(ect_type: str) -> None:
     torch.manual_seed(0)
 
@@ -50,9 +48,7 @@ def test_forward_and_backward_are_finite(ect_type: str) -> None:
     v /= v.pow(2).sum(axis=0).sqrt()
     layer = dect_pkg.EctLayer(config, directions=v)
 
-    data = _make_data(
-        ect_type=ect_type, num_nodes=num_nodes, num_features=num_features
-    )
+    data = _make_data(ect_type=ect_type, num_nodes=num_nodes, num_features=num_features)
     out = layer(data)
 
     assert out.shape == (1, bump_steps, num_thetas)

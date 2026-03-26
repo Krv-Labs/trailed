@@ -28,7 +28,7 @@ def compute_ect_from_numpy(
     parallel: bool = True,
 ) -> NDArray:
     """Compute ECT from numpy arrays.
-    
+
     Parameters
     ----------
     points : ndarray of shape (n_points, n_dims)
@@ -54,7 +54,7 @@ def compute_ect_from_numpy(
         Whether to normalize the ECT.
     parallel : bool, default=True
         Whether to use parallel computation.
-    
+
     Returns
     -------
     ect : ndarray
@@ -64,21 +64,21 @@ def compute_ect_from_numpy(
         - With channels: (n_groups, num_thetas, resolution, n_channels)
     """
     points = np.asarray(points, dtype=np.float32)
-    
+
     if points.ndim != 2:
         raise ValueError(f"Expected 2D points array, got {points.ndim}D")
-    
+
     n_points, ambient_dim = points.shape
-    
+
     # Generate directions
     directions = _generate_directions(num_thetas, ambient_dim, sampling_method, seed)
-    
+
     # Compute node heights
     nh = points @ directions
-    
+
     # Generate linear thresholds
     lin = dect_rust.generate_lin(radius, resolution)
-    
+
     # Handle groups
     if group_ids is None:
         batch = np.zeros(n_points, dtype=np.int64)
@@ -86,12 +86,12 @@ def compute_ect_from_numpy(
     else:
         batch = np.asarray(group_ids, dtype=np.int64)
         dim_size = int(batch.max()) + 1
-    
+
     # Compute ECT
     if channel_ids is not None:
         channels = np.asarray(channel_ids, dtype=np.int64)
         max_channels = int(channels.max()) + 1
-        
+
         if parallel:
             ect = dect_rust.compute_ect_channels_forward_parallel(
                 nh, batch, channels, lin, dim_size, max_channels, scale
@@ -106,19 +106,17 @@ def compute_ect_from_numpy(
                 nh, batch, lin, dim_size, scale
             )
         else:
-            ect = dect_rust.compute_ect_points_forward(
-                nh, batch, lin, dim_size, scale
-            )
-    
+            ect = dect_rust.compute_ect_points_forward(nh, batch, lin, dim_size, scale)
+
     # Normalize if requested
     if normalized:
         if channel_ids is not None:
             ect = ect / (np.max(ect, axis=(-1, -2), keepdims=True) + 1e-8)
         else:
             ect = ect / (np.max(ect, axis=(1, 2), keepdims=True) + 1e-8)
-    
+
     # Remove batch dimension if single group
     if group_ids is None:
         ect = ect[0]
-    
+
     return ect

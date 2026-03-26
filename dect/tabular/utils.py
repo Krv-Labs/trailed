@@ -21,10 +21,10 @@ def compute_ect_from_dataframe(
     **kwargs,
 ) -> NDArray:
     """Compute ECT from a pandas or polars DataFrame.
-    
+
     This is a convenience function that automatically detects the
     DataFrame type and calls the appropriate function.
-    
+
     Parameters
     ----------
     df : pd.DataFrame or pl.DataFrame
@@ -37,7 +37,7 @@ def compute_ect_from_dataframe(
         Column name for channel IDs.
     **kwargs
         Additional arguments passed to compute_ect_from_numpy.
-    
+
     Returns
     -------
     ect : ndarray
@@ -64,7 +64,7 @@ def ect_to_dataframe(
     as_polars: bool = False,
 ) -> Union["pd.DataFrame", "pl.DataFrame"]:
     """Convert ECT array to a DataFrame.
-    
+
     Parameters
     ----------
     ect : ndarray
@@ -74,7 +74,7 @@ def ect_to_dataframe(
         Original group identifiers to use as index.
     as_polars : bool, default=False
         If True, return a polars DataFrame instead of pandas.
-    
+
     Returns
     -------
     df : pd.DataFrame or pl.DataFrame
@@ -93,28 +93,28 @@ def ect_to_dataframe(
         ect = ect.reshape(n_groups, -1)
     else:
         raise ValueError(f"Unexpected ECT shape: {ect.shape}")
-    
+
     n_features = ect.shape[1]
     columns = [f"ect_{i}" for i in range(n_features)]
-    
+
     if as_polars:
         if not HAS_POLARS:
             raise ImportError("polars is required. Install with: pip install polars")
-        
+
         df = pl.DataFrame({col: ect[:, i] for i, col in enumerate(columns)})
-        
+
         if group_ids is not None:
             df = df.with_columns(pl.Series("group_id", group_ids))
-        
+
         return df
     else:
         if not HAS_PANDAS:
             raise ImportError("pandas is required. Install with: pip install pandas")
-        
+
         df = pd.DataFrame(ect, columns=columns)
-        
+
         if group_ids is not None:
             df.index = group_ids
             df.index.name = "group_id"
-        
+
         return df

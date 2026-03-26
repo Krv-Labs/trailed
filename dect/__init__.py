@@ -42,21 +42,24 @@ try:
         EctChannelsFunction,
         compute_ect,
     )
-    __all__.extend([
-        # Configuration
-        "EctConfig",
-        # PyTorch layers
-        "EctLayer",
-        "FastEctLayer",
-        # Autograd functions
-        "EctPointsFunction",
-        "EctPointsDerivativeFunction",
-        "EctEdgesFunction",
-        "EctFacesFunction",
-        "EctChannelsFunction",
-        # Functional interface
-        "compute_ect",
-    ])
+
+    __all__.extend(
+        [
+            # Configuration
+            "EctConfig",
+            # PyTorch layers
+            "EctLayer",
+            "FastEctLayer",
+            # Autograd functions
+            "EctPointsFunction",
+            "EctPointsDerivativeFunction",
+            "EctEdgesFunction",
+            "EctFacesFunction",
+            "EctChannelsFunction",
+            # Functional interface
+            "compute_ect",
+        ]
+    )
 except ImportError:
     pass
 
@@ -67,11 +70,14 @@ try:
         FastEctTransformer,
         EctChannelTransformer,
     )
-    __all__.extend([
-        "EctTransformer",
-        "FastEctTransformer",
-        "EctChannelTransformer",
-    ])
+
+    __all__.extend(
+        [
+            "EctTransformer",
+            "FastEctTransformer",
+            "EctChannelTransformer",
+        ]
+    )
 except ImportError:
     pass
 
@@ -85,13 +91,16 @@ try:
         ect_to_dataframe,
         DataFrameEctTransformer,
     )
-    __all__.extend([
-        "compute_ect_from_numpy",
-        "compute_ect_from_pandas",
-        "compute_ect_from_polars",
-        "compute_ect_from_dataframe",
-        "ect_to_dataframe",
-        "DataFrameEctTransformer",
-    ])
+
+    __all__.extend(
+        [
+            "compute_ect_from_numpy",
+            "compute_ect_from_pandas",
+            "compute_ect_from_polars",
+            "compute_ect_from_dataframe",
+            "ect_to_dataframe",
+            "DataFrameEctTransformer",
+        ]
+    )
 except ImportError:
     pass

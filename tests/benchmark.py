@@ -39,9 +39,7 @@ def _run_layer(
     v /= v.pow(2).sum(axis=0).sqrt()
     layer = dect_pkg.EctLayer(config, directions=v)
 
-    data = _make_data(
-        ect_type=ect_type, num_nodes=num_nodes, num_features=num_features
-    )
+    data = _make_data(ect_type=ect_type, num_nodes=num_nodes, num_features=num_features)
 
     # Warmup before timing to avoid one-time overheads.
     layer(data).sum().backward()

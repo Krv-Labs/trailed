@@ -13,6 +13,7 @@ from .core import compute_ect_from_numpy
 
 try:
     import pandas as pd
+
     HAS_PANDAS = True
 except ImportError:
     HAS_PANDAS = False
@@ -34,7 +35,7 @@ def compute_ect_from_pandas(
     parallel: bool = True,
 ) -> NDArray:
     """Compute ECT from a pandas DataFrame.
-    
+
     Parameters
     ----------
     df : pd.DataFrame
@@ -61,12 +62,12 @@ def compute_ect_from_pandas(
         Whether to normalize the ECT.
     parallel : bool, default=True
         Whether to use parallel computation.
-    
+
     Returns
     -------
     ect : ndarray
         ECT features.
-    
+
     Examples
     --------
     >>> import pandas as pd
@@ -86,11 +87,13 @@ def compute_ect_from_pandas(
     ... )
     """
     if not HAS_PANDAS:
-        raise ImportError("pandas is required for this function. Install with: pip install pandas")
-    
+        raise ImportError(
+            "pandas is required for this function. Install with: pip install pandas"
+        )
+
     # Extract coordinates
     points = df[coord_columns].values.astype(np.float32)
-    
+
     # Extract group IDs
     group_ids = None
     if group_column is not None:
@@ -99,7 +102,7 @@ def compute_ect_from_pandas(
         unique_groups = np.unique(group_ids)
         group_map = {g: i for i, g in enumerate(unique_groups)}
         group_ids = np.array([group_map[g] for g in group_ids], dtype=np.int64)
-    
+
     # Extract channel IDs
     channel_ids = None
     if channel_column is not None:
@@ -108,7 +111,7 @@ def compute_ect_from_pandas(
         unique_channels = np.unique(channel_ids)
         channel_map = {c: i for i, c in enumerate(unique_channels)}
         channel_ids = np.array([channel_map[c] for c in channel_ids], dtype=np.int64)
-    
+
     return compute_ect_from_numpy(
         points=points,
         group_ids=group_ids,
