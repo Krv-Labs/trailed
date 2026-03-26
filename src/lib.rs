@@ -20,7 +20,7 @@ fn generate_uniform_directions<'py>(
     seed: u64,
 ) -> Bound<'py, PyArray2<f32>> {
     let v = directions::generate_uniform_directions(num_thetas, d, seed);
-    v.into_pyarray_bound(py)
+    v.into_pyarray(py)
 }
 
 #[pyfunction]
@@ -30,7 +30,7 @@ fn generate_2d_directions<'py>(
     num_thetas: usize,
 ) -> Bound<'py, PyArray2<f32>> {
     let v = directions::generate_2d_directions(num_thetas);
-    v.into_pyarray_bound(py)
+    v.into_pyarray(py)
 }
 
 #[pyfunction]
@@ -41,7 +41,7 @@ fn generate_multiview_directions<'py>(
     d: usize,
 ) -> Bound<'py, PyArray2<f32>> {
     let v = directions::generate_multiview_directions(num_thetas, d);
-    v.into_pyarray_bound(py)
+    v.into_pyarray(py)
 }
 
 #[pyfunction]
@@ -52,7 +52,7 @@ fn generate_spherical_grid_directions<'py>(
     num_phis: usize,
 ) -> Bound<'py, PyArray2<f32>> {
     let v = directions::generate_spherical_grid_directions(num_thetas, num_phis);
-    v.into_pyarray_bound(py)
+    v.into_pyarray(py)
 }
 
 // ============================================================================
@@ -76,7 +76,7 @@ fn compute_ect_points_forward<'py>(
         dim_size,
         scale,
     );
-    out.into_pyarray_bound(py)
+    out.into_pyarray(py)
 }
 
 #[pyfunction]
@@ -96,7 +96,7 @@ fn compute_ect_points_backward<'py>(
         &grad_output.as_array().to_owned(),
         scale,
     );
-    grad_nh.into_pyarray_bound(py)
+    grad_nh.into_pyarray(py)
 }
 
 #[pyfunction]
@@ -116,7 +116,7 @@ fn compute_ect_points_derivative_forward<'py>(
         dim_size,
         scale,
     );
-    out.into_pyarray_bound(py)
+    out.into_pyarray(py)
 }
 
 #[pyfunction]
@@ -136,7 +136,7 @@ fn compute_ect_points_derivative_backward<'py>(
         &grad_output.as_array().to_owned(),
         scale,
     );
-    grad_nh.into_pyarray_bound(py)
+    grad_nh.into_pyarray(py)
 }
 
 // ============================================================================
@@ -162,7 +162,7 @@ fn compute_ect_edges_forward<'py>(
         dim_size,
         scale,
     );
-    out.into_pyarray_bound(py)
+    out.into_pyarray(py)
 }
 
 #[pyfunction]
@@ -184,7 +184,7 @@ fn compute_ect_edges_backward<'py>(
         &grad_output.as_array().to_owned(),
         scale,
     );
-    grad_nh.into_pyarray_bound(py)
+    grad_nh.into_pyarray(py)
 }
 
 // ============================================================================
@@ -212,7 +212,7 @@ fn compute_ect_faces_forward<'py>(
         dim_size,
         scale,
     );
-    out.into_pyarray_bound(py)
+    out.into_pyarray(py)
 }
 
 #[pyfunction]
@@ -236,7 +236,7 @@ fn compute_ect_faces_backward<'py>(
         &grad_output.as_array().to_owned(),
         scale,
     );
-    grad_nh.into_pyarray_bound(py)
+    grad_nh.into_pyarray(py)
 }
 
 // ============================================================================
@@ -264,7 +264,7 @@ fn compute_ect_channels_forward<'py>(
         max_channels,
         scale,
     );
-    out.into_pyarray_bound(py)
+    out.into_pyarray(py)
 }
 
 #[pyfunction]
@@ -286,7 +286,7 @@ fn compute_ect_channels_backward<'py>(
         &grad_output.as_array().to_owned(),
         scale,
     );
-    grad_nh.into_pyarray_bound(py)
+    grad_nh.into_pyarray(py)
 }
 
 // ============================================================================
@@ -301,7 +301,7 @@ fn compute_fast_ect<'py>(
     resolution: usize,
 ) -> Bound<'py, PyArray2<f32>> {
     let out = ect::compute_fast_ect(&nh.as_array().to_owned(), resolution);
-    out.into_pyarray_bound(py)
+    out.into_pyarray(py)
 }
 
 #[pyfunction]
@@ -319,7 +319,7 @@ fn compute_fast_ect_batched<'py>(
         dim_size,
         resolution,
     );
-    out.into_pyarray_bound(py)
+    out.into_pyarray(py)
 }
 
 // ============================================================================
@@ -343,7 +343,7 @@ fn compute_ect_points_forward_parallel<'py>(
         dim_size,
         scale,
     );
-    out.into_pyarray_bound(py)
+    out.into_pyarray(py)
 }
 
 #[pyfunction]
@@ -363,7 +363,7 @@ fn compute_ect_points_backward_parallel<'py>(
         &grad_output.as_array().to_owned(),
         scale,
     );
-    grad_nh.into_pyarray_bound(py)
+    grad_nh.into_pyarray(py)
 }
 
 #[pyfunction]
@@ -374,7 +374,7 @@ fn compute_fast_ect_parallel<'py>(
     resolution: usize,
 ) -> Bound<'py, PyArray2<f32>> {
     let out = parallel::compute_fast_ect_parallel(&nh.as_array().to_owned(), resolution);
-    out.into_pyarray_bound(py)
+    out.into_pyarray(py)
 }
 
 #[pyfunction]
@@ -392,7 +392,7 @@ fn compute_fast_ect_batched_parallel<'py>(
         dim_size,
         resolution,
     );
-    out.into_pyarray_bound(py)
+    out.into_pyarray(py)
 }
 
 #[pyfunction]
@@ -416,7 +416,7 @@ fn compute_ect_channels_forward_parallel<'py>(
         max_channels,
         scale,
     );
-    out.into_pyarray_bound(py)
+    out.into_pyarray(py)
 }
 
 // ============================================================================
@@ -431,7 +431,7 @@ fn generate_lin<'py>(
     resolution: usize,
 ) -> Bound<'py, PyArray1<f32>> {
     let lin = ect::generate_lin(radius, resolution);
-    lin.into_pyarray_bound(py)
+    lin.into_pyarray(py)
 }
 
 #[pyfunction]
@@ -442,7 +442,7 @@ fn compute_node_heights<'py>(
     v: PyReadonlyArray2<f32>,
 ) -> Bound<'py, PyArray2<f32>> {
     let nh = ect::compute_node_heights(&x.as_array().to_owned(), &v.as_array().to_owned());
-    nh.into_pyarray_bound(py)
+    nh.into_pyarray(py)
 }
 
 // ============================================================================
