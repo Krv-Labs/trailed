@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 import dect_rust
-from dect.directions import generate_uniform_directions, generate_lin
+from dect.sampling import generate_uniform_directions, generate_lin
 
 
 class TestEctPointsForward:
