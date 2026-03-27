@@ -1,10 +1,17 @@
-# TRAILED
+# TRAILED: Topological Regularization and Integrity Learning for EHR Data
 
-A high-performance Rust implementation of the Euler Characteristic Transform (ECT), exposed through ergonomic Python bindings as TRAILED.
+A high-performance Rust implementation of the Euler Characteristic Transform (ECT), exposed through ergonomic Python bindings. TRAILED provides the ECT foundation for topological analysis of structured data — including patient trajectories, point clouds, graphs, and simplicial complexes.
+
+## Overview
+
+The Euler Characteristic Transform (ECT) is a provably injective topological descriptor — it encodes the shape of a dataset losslessly, without relying on coordinates or distance metrics. TRAILED implements a differentiable ECT, enabling it to be used as both a feature extractor and a training-time regularizer in deep learning pipelines.
+
+This library is the open-source ECT core. It is designed to be embedded into larger systems that require topologically-aware representations of structured or sequential data.
 
 ## Features
 
 - Fast Rust core for ECT computation.
+- Differentiable: supports forward and backward passes for use as a loss or layer.
 - Native Python API for NumPy workflows.
 - Optional integrations for scikit-learn, PyTorch, and dataframe libraries.
 
