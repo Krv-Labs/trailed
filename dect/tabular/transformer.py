@@ -5,11 +5,11 @@ This module provides a transformer class for computing ECT from DataFrames
 with a consistent interface supporting both pandas and polars.
 """
 
-from typing import Literal, List, Optional, Union
-
-from numpy.typing import NDArray
+from typing import List, Literal, Optional, Union
 
 import trailed_rust
+from numpy.typing import NDArray
+
 from dect.sampling import generate_directions as _generate_directions
 
 from .utils import compute_ect_from_dataframe, ect_to_dataframe
@@ -161,6 +161,8 @@ class DataFrameEctTransformer:
             seed=self.seed,
             normalized=self.normalized,
             parallel=self.parallel,
+            directions=self.directions_,
+            lin=self._lin,
         )
 
         if self.output_format == "numpy":
