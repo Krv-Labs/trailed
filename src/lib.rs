@@ -1,10 +1,48 @@
 use pyo3::prelude::*;
+use pyo3::exceptions::PyValueError;
 use numpy::{PyReadonlyArray1, PyReadonlyArray2, PyReadonlyArray3, PyReadonlyArray4,
-            PyArray1, PyArray2, PyArray3, PyArray4, IntoPyArray};
+            PyArray1, PyArray2, PyArray3, PyArray4, IntoPyArray, PyUntypedArrayMethods};
+use numpy::ndarray::ArrayView1;
 
 mod directions;
 mod ect;
 mod parallel;
+
+fn validate_positive_resolution(resolution: usize, name: &str) -> PyResult<()> {
+    if resolution == 0 {
+        return Err(PyValueError::new_err(format!(
+            "{name} must be >= 1"
+        )));
+    }
+    Ok(())
+}
+
+fn validate_min_resolution(resolution: usize, min: usize, name: &str) -> PyResult<()> {
+    if resolution < min {
+        return Err(PyValueError::new_err(format!(
+            "{name} must be >= {min}"
+        )));
+    }
+    Ok(())
+}
+
+fn validate_dim_size(dim_size: usize) -> PyResult<()> {
+    if dim_size == 0 {
+        return Err(PyValueError::new_err("dim_size must be >= 1"));
+    }
+    Ok(())
+}
+
+fn validate_indices(indices: ArrayView1<'_, i64>, upper: usize, name: &str) -> PyResult<()> {
+    for (i, &idx) in indices.iter().enumerate() {
+        if idx < 0 || (idx as usize) >= upper {
+            return Err(PyValueError::new_err(format!(
+                "{name}[{i}]={idx} is out of range [0, {upper})"
+            )));
+        }
+    }
+    Ok(())
+}
 
 // ============================================================================
 // Direction Generation Functions
@@ -77,7 +115,10 @@ fn compute_ect_points_forward<'py>(
     lin: PyReadonlyArray1<f32>,
     dim_size: usize,
     scale: f32,
-) -> Bound<'py, PyArray3<f32>> {
+) -> PyResult<Bound<'py, PyArray3<f32>>> {
+    validate_dim_size(dim_size)?;
+    validate_indices(batch.as_array(), dim_size, "batch")?;
+
     let out = ect::compute_ect_points_forward(
         &nh.as_array().to_owned(),
         &batch.as_array().to_owned(),
@@ -85,7 +126,7 @@ fn compute_ect_points_forward<'py>(
         dim_size,
         scale,
     );
-    out.into_pyarray(py)
+    Ok(out.into_pyarray(py))
 }
 
 #[pyfunction]
@@ -97,7 +138,11 @@ fn compute_ect_points_backward<'py>(
     lin: PyReadonlyArray1<f32>,
     grad_output: PyReadonlyArray3<f32>,
     scale: f32,
-) -> Bound<'py, PyArray2<f32>> {
+) -> PyResult<Bound<'py, PyArray2<f32>>> {
+    let dim_size = grad_output.shape()[0];
+    validate_dim_size(dim_size)?;
+    validate_indices(batch.as_array(), dim_size, "batch")?;
+
     let grad_nh = ect::compute_ect_points_backward(
         &nh.as_array().to_owned(),
         &batch.as_array().to_owned(),
@@ -105,7 +150,7 @@ fn compute_ect_points_backward<'py>(
         &grad_output.as_array().to_owned(),
         scale,
     );
-    grad_nh.into_pyarray(py)
+    Ok(grad_nh.into_pyarray(py))
 }
 
 #[pyfunction]
@@ -117,7 +162,10 @@ fn compute_ect_points_derivative_forward<'py>(
     lin: PyReadonlyArray1<f32>,
     dim_size: usize,
     scale: f32,
-) -> Bound<'py, PyArray3<f32>> {
+) -> PyResult<Bound<'py, PyArray3<f32>>> {
+    validate_dim_size(dim_size)?;
+    validate_indices(batch.as_array(), dim_size, "batch")?;
+
     let out = ect::compute_ect_points_derivative_forward(
         &nh.as_array().to_owned(),
         &batch.as_array().to_owned(),
@@ -125,7 +173,7 @@ fn compute_ect_points_derivative_forward<'py>(
         dim_size,
         scale,
     );
-    out.into_pyarray(py)
+    Ok(out.into_pyarray(py))
 }
 
 #[pyfunction]
@@ -137,7 +185,11 @@ fn compute_ect_points_derivative_backward<'py>(
     lin: PyReadonlyArray1<f32>,
     grad_output: PyReadonlyArray3<f32>,
     scale: f32,
-) -> Bound<'py, PyArray2<f32>> {
+) -> PyResult<Bound<'py, PyArray2<f32>>> {
+    let dim_size = grad_output.shape()[0];
+    validate_dim_size(dim_size)?;
+    validate_indices(batch.as_array(), dim_size, "batch")?;
+
     let grad_nh = ect::compute_ect_points_derivative_backward(
         &nh.as_array().to_owned(),
         &batch.as_array().to_owned(),
@@ -145,7 +197,7 @@ fn compute_ect_points_derivative_backward<'py>(
         &grad_output.as_array().to_owned(),
         scale,
     );
-    grad_nh.into_pyarray(py)
+    Ok(grad_nh.into_pyarray(py))
 }
 
 // ============================================================================
@@ -162,7 +214,10 @@ fn compute_ect_edges_forward<'py>(
     lin: PyReadonlyArray1<f32>,
     dim_size: usize,
     scale: f32,
-) -> Bound<'py, PyArray3<f32>> {
+) -> PyResult<Bound<'py, PyArray3<f32>>> {
+    validate_dim_size(dim_size)?;
+    validate_indices(batch.as_array(), dim_size, "batch")?;
+
     let out = ect::compute_ect_edges_forward(
         &nh.as_array().to_owned(),
         &batch.as_array().to_owned(),
@@ -171,7 +226,7 @@ fn compute_ect_edges_forward<'py>(
         dim_size,
         scale,
     );
-    out.into_pyarray(py)
+    Ok(out.into_pyarray(py))
 }
 
 #[pyfunction]
@@ -184,7 +239,11 @@ fn compute_ect_edges_backward<'py>(
     lin: PyReadonlyArray1<f32>,
     grad_output: PyReadonlyArray3<f32>,
     scale: f32,
-) -> Bound<'py, PyArray2<f32>> {
+) -> PyResult<Bound<'py, PyArray2<f32>>> {
+    let dim_size = grad_output.shape()[0];
+    validate_dim_size(dim_size)?;
+    validate_indices(batch.as_array(), dim_size, "batch")?;
+
     let grad_nh = ect::compute_ect_edges_backward(
         &nh.as_array().to_owned(),
         &batch.as_array().to_owned(),
@@ -193,7 +252,7 @@ fn compute_ect_edges_backward<'py>(
         &grad_output.as_array().to_owned(),
         scale,
     );
-    grad_nh.into_pyarray(py)
+    Ok(grad_nh.into_pyarray(py))
 }
 
 // ============================================================================
@@ -211,7 +270,10 @@ fn compute_ect_faces_forward<'py>(
     lin: PyReadonlyArray1<f32>,
     dim_size: usize,
     scale: f32,
-) -> Bound<'py, PyArray3<f32>> {
+) -> PyResult<Bound<'py, PyArray3<f32>>> {
+    validate_dim_size(dim_size)?;
+    validate_indices(batch.as_array(), dim_size, "batch")?;
+
     let out = ect::compute_ect_faces_forward(
         &nh.as_array().to_owned(),
         &batch.as_array().to_owned(),
@@ -221,7 +283,7 @@ fn compute_ect_faces_forward<'py>(
         dim_size,
         scale,
     );
-    out.into_pyarray(py)
+    Ok(out.into_pyarray(py))
 }
 
 #[pyfunction]
@@ -235,7 +297,11 @@ fn compute_ect_faces_backward<'py>(
     lin: PyReadonlyArray1<f32>,
     grad_output: PyReadonlyArray3<f32>,
     scale: f32,
-) -> Bound<'py, PyArray2<f32>> {
+) -> PyResult<Bound<'py, PyArray2<f32>>> {
+    let dim_size = grad_output.shape()[0];
+    validate_dim_size(dim_size)?;
+    validate_indices(batch.as_array(), dim_size, "batch")?;
+
     let grad_nh = ect::compute_ect_faces_backward(
         &nh.as_array().to_owned(),
         &batch.as_array().to_owned(),
@@ -245,7 +311,7 @@ fn compute_ect_faces_backward<'py>(
         &grad_output.as_array().to_owned(),
         scale,
     );
-    grad_nh.into_pyarray(py)
+    Ok(grad_nh.into_pyarray(py))
 }
 
 // ============================================================================
@@ -263,7 +329,12 @@ fn compute_ect_channels_forward<'py>(
     dim_size: usize,
     max_channels: usize,
     scale: f32,
-) -> Bound<'py, PyArray4<f32>> {
+) -> PyResult<Bound<'py, PyArray4<f32>>> {
+    validate_dim_size(dim_size)?;
+    validate_dim_size(max_channels)?;
+    validate_indices(batch.as_array(), dim_size, "batch")?;
+    validate_indices(channels.as_array(), max_channels, "channels")?;
+
     let out = ect::compute_ect_channels_forward(
         &nh.as_array().to_owned(),
         &batch.as_array().to_owned(),
@@ -273,7 +344,7 @@ fn compute_ect_channels_forward<'py>(
         max_channels,
         scale,
     );
-    out.into_pyarray(py)
+    Ok(out.into_pyarray(py))
 }
 
 #[pyfunction]
@@ -286,7 +357,14 @@ fn compute_ect_channels_backward<'py>(
     lin: PyReadonlyArray1<f32>,
     grad_output: PyReadonlyArray4<f32>,
     scale: f32,
-) -> Bound<'py, PyArray2<f32>> {
+) -> PyResult<Bound<'py, PyArray2<f32>>> {
+    let dim_size = grad_output.shape()[0];
+    let max_channels = grad_output.shape()[3];
+    validate_dim_size(dim_size)?;
+    validate_dim_size(max_channels)?;
+    validate_indices(batch.as_array(), dim_size, "batch")?;
+    validate_indices(channels.as_array(), max_channels, "channels")?;
+
     let grad_nh = ect::compute_ect_channels_backward(
         &nh.as_array().to_owned(),
         &batch.as_array().to_owned(),
@@ -295,7 +373,7 @@ fn compute_ect_channels_backward<'py>(
         &grad_output.as_array().to_owned(),
         scale,
     );
-    grad_nh.into_pyarray(py)
+    Ok(grad_nh.into_pyarray(py))
 }
 
 // ============================================================================
@@ -308,9 +386,11 @@ fn compute_fast_ect<'py>(
     py: Python<'py>,
     nh: PyReadonlyArray2<f32>,
     resolution: usize,
-) -> Bound<'py, PyArray2<f32>> {
+) -> PyResult<Bound<'py, PyArray2<f32>>> {
+    validate_positive_resolution(resolution, "resolution")?;
+
     let out = ect::compute_fast_ect(&nh.as_array().to_owned(), resolution);
-    out.into_pyarray(py)
+    Ok(out.into_pyarray(py))
 }
 
 #[pyfunction]
@@ -321,14 +401,18 @@ fn compute_fast_ect_batched<'py>(
     batch: PyReadonlyArray1<i64>,
     dim_size: usize,
     resolution: usize,
-) -> Bound<'py, PyArray3<f32>> {
+) -> PyResult<Bound<'py, PyArray3<f32>>> {
+    validate_dim_size(dim_size)?;
+    validate_positive_resolution(resolution, "resolution")?;
+    validate_indices(batch.as_array(), dim_size, "batch")?;
+
     let out = ect::compute_fast_ect_batched(
         &nh.as_array().to_owned(),
         &batch.as_array().to_owned(),
         dim_size,
         resolution,
     );
-    out.into_pyarray(py)
+    Ok(out.into_pyarray(py))
 }
 
 // ============================================================================
@@ -344,7 +428,10 @@ fn compute_ect_points_forward_parallel<'py>(
     lin: PyReadonlyArray1<f32>,
     dim_size: usize,
     scale: f32,
-) -> Bound<'py, PyArray3<f32>> {
+) -> PyResult<Bound<'py, PyArray3<f32>>> {
+    validate_dim_size(dim_size)?;
+    validate_indices(batch.as_array(), dim_size, "batch")?;
+
     let out = parallel::compute_ecc_forward_parallel(
         &nh.as_array().to_owned(),
         &batch.as_array().to_owned(),
@@ -352,7 +439,7 @@ fn compute_ect_points_forward_parallel<'py>(
         dim_size,
         scale,
     );
-    out.into_pyarray(py)
+    Ok(out.into_pyarray(py))
 }
 
 #[pyfunction]
@@ -364,7 +451,11 @@ fn compute_ect_points_backward_parallel<'py>(
     lin: PyReadonlyArray1<f32>,
     grad_output: PyReadonlyArray3<f32>,
     scale: f32,
-) -> Bound<'py, PyArray2<f32>> {
+) -> PyResult<Bound<'py, PyArray2<f32>>> {
+    let dim_size = grad_output.shape()[0];
+    validate_dim_size(dim_size)?;
+    validate_indices(batch.as_array(), dim_size, "batch")?;
+
     let grad_nh = parallel::compute_ecc_backward_parallel(
         &nh.as_array().to_owned(),
         &batch.as_array().to_owned(),
@@ -372,7 +463,7 @@ fn compute_ect_points_backward_parallel<'py>(
         &grad_output.as_array().to_owned(),
         scale,
     );
-    grad_nh.into_pyarray(py)
+    Ok(grad_nh.into_pyarray(py))
 }
 
 #[pyfunction]
@@ -381,9 +472,11 @@ fn compute_fast_ect_parallel<'py>(
     py: Python<'py>,
     nh: PyReadonlyArray2<f32>,
     resolution: usize,
-) -> Bound<'py, PyArray2<f32>> {
+) -> PyResult<Bound<'py, PyArray2<f32>>> {
+    validate_positive_resolution(resolution, "resolution")?;
+
     let out = parallel::compute_fast_ect_parallel(&nh.as_array().to_owned(), resolution);
-    out.into_pyarray(py)
+    Ok(out.into_pyarray(py))
 }
 
 #[pyfunction]
@@ -394,14 +487,18 @@ fn compute_fast_ect_batched_parallel<'py>(
     batch: PyReadonlyArray1<i64>,
     dim_size: usize,
     resolution: usize,
-) -> Bound<'py, PyArray3<f32>> {
+) -> PyResult<Bound<'py, PyArray3<f32>>> {
+    validate_dim_size(dim_size)?;
+    validate_positive_resolution(resolution, "resolution")?;
+    validate_indices(batch.as_array(), dim_size, "batch")?;
+
     let out = parallel::compute_fast_ect_batched_parallel(
         &nh.as_array().to_owned(),
         &batch.as_array().to_owned(),
         dim_size,
         resolution,
     );
-    out.into_pyarray(py)
+    Ok(out.into_pyarray(py))
 }
 
 #[pyfunction]
@@ -415,7 +512,12 @@ fn compute_ect_channels_forward_parallel<'py>(
     dim_size: usize,
     max_channels: usize,
     scale: f32,
-) -> Bound<'py, PyArray4<f32>> {
+) -> PyResult<Bound<'py, PyArray4<f32>>> {
+    validate_dim_size(dim_size)?;
+    validate_dim_size(max_channels)?;
+    validate_indices(batch.as_array(), dim_size, "batch")?;
+    validate_indices(channels.as_array(), max_channels, "channels")?;
+
     let out = parallel::compute_ect_channels_forward_parallel(
         &nh.as_array().to_owned(),
         &batch.as_array().to_owned(),
@@ -425,7 +527,7 @@ fn compute_ect_channels_forward_parallel<'py>(
         max_channels,
         scale,
     );
-    out.into_pyarray(py)
+    Ok(out.into_pyarray(py))
 }
 
 #[pyfunction]
@@ -451,7 +553,9 @@ fn compute_ect_batch_parallel<'py>(
     radius: f32,
     resolution: usize,
     scale: f32,
-) -> Bound<'py, PyArray3<f32>> {
+) -> PyResult<Bound<'py, PyArray3<f32>>> {
+    validate_min_resolution(resolution, 2, "resolution")?;
+
     let out = parallel::compute_ect_batch_parallel(
         &x.as_array().to_owned(),
         &v.as_array().to_owned(),
@@ -459,7 +563,7 @@ fn compute_ect_batch_parallel<'py>(
         resolution,
         scale,
     );
-    out.into_pyarray(py)
+    Ok(out.into_pyarray(py))
 }
 
 // ============================================================================
@@ -472,9 +576,11 @@ fn generate_lin<'py>(
     py: Python<'py>,
     radius: f32,
     resolution: usize,
-) -> Bound<'py, PyArray1<f32>> {
+) -> PyResult<Bound<'py, PyArray1<f32>>> {
+    validate_positive_resolution(resolution, "resolution")?;
+
     let lin = ect::generate_lin(radius, resolution);
-    lin.into_pyarray(py)
+    Ok(lin.into_pyarray(py))
 }
 
 #[pyfunction]
