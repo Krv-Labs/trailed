@@ -10,7 +10,7 @@ from typing import Literal, Optional
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
-import dect_rust
+import trailed_rust
 from dect.sampling import generate_directions as _generate_directions_func
 
 
@@ -107,9 +107,9 @@ class FastEctTransformer:
             nh = points @ self.directions_
 
             if self.parallel:
-                ect = dect_rust.compute_fast_ect_parallel(nh, self.resolution)
+                ect = trailed_rust.compute_fast_ect_parallel(nh, self.resolution)
             else:
-                ect = dect_rust.compute_fast_ect(nh, self.resolution)
+                ect = trailed_rust.compute_fast_ect(nh, self.resolution)
 
             results.append(ect)
 

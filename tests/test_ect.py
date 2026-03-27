@@ -2,7 +2,7 @@
 
 import numpy as np
 
-import dect_rust
+import trailed_rust
 from dect.sampling import generate_lin
 
 
@@ -16,7 +16,7 @@ class TestEctPointsForward:
         batch = np.zeros(n_points, dtype=np.int64)
         lin = generate_lin(1.0, resolution)
 
-        ect = dect_rust.compute_ect_points_forward(nh, batch, lin, 1, 50.0)
+        ect = trailed_rust.compute_ect_points_forward(nh, batch, lin, 1, 50.0)
         assert ect.shape == (1, resolution, n_dirs)
 
     def test_batched_shape(self):
@@ -29,7 +29,7 @@ class TestEctPointsForward:
         batch = np.repeat(np.arange(n_batches), n_points // n_batches).astype(np.int64)
         lin = generate_lin(1.0, resolution)
 
-        ect = dect_rust.compute_ect_points_forward(nh, batch, lin, n_batches, 50.0)
+        ect = trailed_rust.compute_ect_points_forward(nh, batch, lin, n_batches, 50.0)
         assert ect.shape == (n_batches, resolution, n_dirs)
 
     def test_monotonic_in_resolution(self):
@@ -41,7 +41,7 @@ class TestEctPointsForward:
         batch = np.zeros(n_points, dtype=np.int64)
         lin = generate_lin(1.0, resolution)
 
-        ect = dect_rust.compute_ect_points_forward(nh, batch, lin, 1, 100.0)
+        ect = trailed_rust.compute_ect_points_forward(nh, batch, lin, 1, 100.0)
 
         # ECT should be monotonically increasing along resolution axis
         for j in range(n_dirs):
@@ -57,8 +57,8 @@ class TestEctPointsForward:
         batch = np.zeros(n_points, dtype=np.int64)
         lin = generate_lin(1.0, resolution)
 
-        ect_low = dect_rust.compute_ect_points_forward(nh, batch, lin, 1, 10.0)
-        ect_high = dect_rust.compute_ect_points_forward(nh, batch, lin, 1, 100.0)
+        ect_low = trailed_rust.compute_ect_points_forward(nh, batch, lin, 1, 10.0)
+        ect_high = trailed_rust.compute_ect_points_forward(nh, batch, lin, 1, 100.0)
 
         # Higher scale should produce sharper transitions
         # Middle values should differ more than edge values
@@ -81,7 +81,7 @@ class TestEctPointsBackward:
         lin = generate_lin(1.0, resolution)
         grad_output = np.random.randn(1, resolution, n_dirs).astype(np.float32)
 
-        grad_nh = dect_rust.compute_ect_points_backward(
+        grad_nh = trailed_rust.compute_ect_points_backward(
             nh, batch, lin, grad_output, 50.0
         )
         assert grad_nh.shape == (n_points, n_dirs)
@@ -96,7 +96,7 @@ class TestEctPointsBackward:
         lin = generate_lin(1.0, resolution)
         grad_output = np.ones((1, resolution, n_dirs), dtype=np.float32)
 
-        grad_nh = dect_rust.compute_ect_points_backward(
+        grad_nh = trailed_rust.compute_ect_points_backward(
             nh, batch, lin, grad_output, 50.0
         )
         assert np.all(np.isfinite(grad_nh))
@@ -114,7 +114,7 @@ class TestEctChannels:
         channels = np.random.randint(0, n_channels, n_points).astype(np.int64)
         lin = generate_lin(1.0, resolution)
 
-        ect = dect_rust.compute_ect_channels_forward(
+        ect = trailed_rust.compute_ect_channels_forward(
             nh, batch, channels, lin, 1, n_channels, 500.0
         )
         assert ect.shape == (1, n_dirs, resolution, n_channels)
@@ -139,7 +139,7 @@ class TestEctChannels:
 
         lin = generate_lin(1.0, resolution)
 
-        ect = dect_rust.compute_ect_channels_forward(
+        ect = trailed_rust.compute_ect_channels_forward(
             nh, batch, channels, lin, 1, n_channels, 100.0
         )
 
@@ -155,7 +155,7 @@ class TestFastEct:
 
         nh = (np.random.randn(n_points, n_dirs) * 0.5).astype(np.float32)
 
-        ect = dect_rust.compute_fast_ect(nh, resolution)
+        ect = trailed_rust.compute_fast_ect(nh, resolution)
         assert ect.shape == (resolution, n_dirs)
 
     def test_cumulative(self):
@@ -165,7 +165,7 @@ class TestFastEct:
 
         nh = (np.random.randn(n_points, n_dirs) * 0.3).astype(np.float32)
 
-        ect = dect_rust.compute_fast_ect(nh, resolution)
+        ect = trailed_rust.compute_fast_ect(nh, resolution)
 
         # Should be monotonically increasing (cumsum)
         for j in range(n_dirs):
@@ -181,7 +181,7 @@ class TestFastEct:
         nh = (np.random.randn(n_points, n_dirs) * 0.5).astype(np.float32)
         batch = np.repeat(np.arange(n_batches), n_points // n_batches).astype(np.int64)
 
-        ect = dect_rust.compute_fast_ect_batched(nh, batch, n_batches, resolution)
+        ect = trailed_rust.compute_fast_ect_batched(nh, batch, n_batches, resolution)
         assert ect.shape == (n_batches, resolution, n_dirs)
 
 
@@ -195,8 +195,8 @@ class TestParallelConsistency:
         batch = np.zeros(n_points, dtype=np.int64)
         lin = generate_lin(1.0, resolution)
 
-        ect_seq = dect_rust.compute_ect_points_forward(nh, batch, lin, 1, 50.0)
-        ect_par = dect_rust.compute_ect_points_forward_parallel(nh, batch, lin, 1, 50.0)
+        ect_seq = trailed_rust.compute_ect_points_forward(nh, batch, lin, 1, 50.0)
+        ect_par = trailed_rust.compute_ect_points_forward_parallel(nh, batch, lin, 1, 50.0)
 
         assert np.allclose(ect_seq, ect_par, atol=1e-5)
 
@@ -210,10 +210,10 @@ class TestParallelConsistency:
         lin = generate_lin(1.0, resolution)
         grad_output = np.random.randn(1, resolution, n_dirs).astype(np.float32)
 
-        grad_seq = dect_rust.compute_ect_points_backward(
+        grad_seq = trailed_rust.compute_ect_points_backward(
             nh, batch, lin, grad_output, 50.0
         )
-        grad_par = dect_rust.compute_ect_points_backward_parallel(
+        grad_par = trailed_rust.compute_ect_points_backward_parallel(
             nh, batch, lin, grad_output, 50.0
         )
 
@@ -226,8 +226,8 @@ class TestParallelConsistency:
 
         nh = (np.random.randn(n_points, n_dirs) * 0.5).astype(np.float32)
 
-        ect_seq = dect_rust.compute_fast_ect(nh, resolution)
-        ect_par = dect_rust.compute_fast_ect_parallel(nh, resolution)
+        ect_seq = trailed_rust.compute_fast_ect(nh, resolution)
+        ect_par = trailed_rust.compute_fast_ect_parallel(nh, resolution)
 
         assert np.allclose(ect_seq, ect_par, atol=1e-5)
 
@@ -250,7 +250,7 @@ class TestEctEdges:
         )
         lin = generate_lin(1.0, resolution)
 
-        ect = dect_rust.compute_ect_edges_forward(nh, batch, edge_index, lin, 1, 50.0)
+        ect = trailed_rust.compute_ect_edges_forward(nh, batch, edge_index, lin, 1, 50.0)
         assert ect.shape == (1, resolution, n_dirs)
 
 
@@ -281,7 +281,7 @@ class TestEctFaces:
         )
         lin = generate_lin(1.0, resolution)
 
-        ect = dect_rust.compute_ect_faces_forward(
+        ect = trailed_rust.compute_ect_faces_forward(
             nh, batch, edge_index, face, lin, 1, 50.0
         )
         assert ect.shape == (1, resolution, n_dirs)

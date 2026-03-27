@@ -10,7 +10,7 @@ from typing import Literal, Optional
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
-import dect_rust
+import trailed_rust
 from dect.sampling import generate_directions as _generate_directions_func
 
 
@@ -120,7 +120,7 @@ class EctTransformer:
 
         self.ambient_dim_ = X.shape[2]
         self.directions_ = self._generate_directions(self.ambient_dim_)
-        self._lin = dect_rust.generate_lin(self.radius, self.resolution)
+        self._lin = trailed_rust.generate_lin(self.radius, self.resolution)
 
         return self
 
@@ -162,11 +162,11 @@ class EctTransformer:
             batch = np.zeros(n_points, dtype=np.int64)
 
             if self.parallel:
-                ect = dect_rust.compute_ect_points_forward_parallel(
+                ect = trailed_rust.compute_ect_points_forward_parallel(
                     nh, batch, self._lin, 1, self.scale
                 )
             else:
-                ect = dect_rust.compute_ect_points_forward(
+                ect = trailed_rust.compute_ect_points_forward(
                     nh, batch, self._lin, 1, self.scale
                 )
 

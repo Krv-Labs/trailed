@@ -7,7 +7,7 @@ the Rust ECT backend for differentiable computation.
 
 import torch
 
-import dect_rust
+import trailed_rust
 
 
 class EctPointsFunction(torch.autograd.Function):
@@ -19,7 +19,7 @@ class EctPointsFunction(torch.autograd.Function):
         batch_np = batch.detach().cpu().numpy()
         lin_np = lin.detach().cpu().numpy().flatten()
 
-        out_np = dect_rust.compute_ect_points_forward(
+        out_np = trailed_rust.compute_ect_points_forward(
             nh_np, batch_np, lin_np, dim_size, scale
         )
 
@@ -38,7 +38,7 @@ class EctPointsFunction(torch.autograd.Function):
         lin_np = lin.detach().cpu().numpy().flatten()
         grad_output_np = grad_output.detach().cpu().numpy()
 
-        grad_nh_np = dect_rust.compute_ect_points_backward(
+        grad_nh_np = trailed_rust.compute_ect_points_backward(
             nh_np, batch_np, lin_np, grad_output_np, scale
         )
 
@@ -54,7 +54,7 @@ class EctPointsDerivativeFunction(torch.autograd.Function):
         batch_np = batch.detach().cpu().numpy()
         lin_np = lin.detach().cpu().numpy().flatten()
 
-        out_np = dect_rust.compute_ect_points_derivative_forward(
+        out_np = trailed_rust.compute_ect_points_derivative_forward(
             nh_np, batch_np, lin_np, dim_size, scale
         )
 
@@ -73,7 +73,7 @@ class EctPointsDerivativeFunction(torch.autograd.Function):
         lin_np = lin.detach().cpu().numpy().flatten()
         grad_output_np = grad_output.detach().cpu().numpy()
 
-        grad_nh_np = dect_rust.compute_ect_points_derivative_backward(
+        grad_nh_np = trailed_rust.compute_ect_points_derivative_backward(
             nh_np, batch_np, lin_np, grad_output_np, scale
         )
 
@@ -90,7 +90,7 @@ class EctEdgesFunction(torch.autograd.Function):
         edge_index_np = edge_index.detach().cpu().numpy()
         lin_np = lin.detach().cpu().numpy().flatten()
 
-        out_np = dect_rust.compute_ect_edges_forward(
+        out_np = trailed_rust.compute_ect_edges_forward(
             nh_np, batch_np, edge_index_np, lin_np, dim_size, scale
         )
 
@@ -110,7 +110,7 @@ class EctEdgesFunction(torch.autograd.Function):
         lin_np = lin.detach().cpu().numpy().flatten()
         grad_output_np = grad_output.detach().cpu().numpy()
 
-        grad_nh_np = dect_rust.compute_ect_edges_backward(
+        grad_nh_np = trailed_rust.compute_ect_edges_backward(
             nh_np, batch_np, edge_index_np, lin_np, grad_output_np, scale
         )
 
@@ -135,7 +135,7 @@ class EctFacesFunction(torch.autograd.Function):
         face_np = face.detach().cpu().numpy()
         lin_np = lin.detach().cpu().numpy().flatten()
 
-        out_np = dect_rust.compute_ect_faces_forward(
+        out_np = trailed_rust.compute_ect_faces_forward(
             nh_np, batch_np, edge_index_np, face_np, lin_np, dim_size, scale
         )
 
@@ -156,7 +156,7 @@ class EctFacesFunction(torch.autograd.Function):
         lin_np = lin.detach().cpu().numpy().flatten()
         grad_output_np = grad_output.detach().cpu().numpy()
 
-        grad_nh_np = dect_rust.compute_ect_faces_backward(
+        grad_nh_np = trailed_rust.compute_ect_faces_backward(
             nh_np, batch_np, edge_index_np, face_np, lin_np, grad_output_np, scale
         )
 
@@ -181,7 +181,7 @@ class EctChannelsFunction(torch.autograd.Function):
         channels_np = channels.detach().cpu().numpy()
         lin_np = lin.detach().cpu().numpy().flatten()
 
-        out_np = dect_rust.compute_ect_channels_forward(
+        out_np = trailed_rust.compute_ect_channels_forward(
             nh_np, batch_np, channels_np, lin_np, dim_size, max_channels, scale
         )
 
@@ -201,7 +201,7 @@ class EctChannelsFunction(torch.autograd.Function):
         lin_np = lin.detach().cpu().numpy().flatten()
         grad_output_np = grad_output.detach().cpu().numpy()
 
-        grad_nh_np = dect_rust.compute_ect_channels_backward(
+        grad_nh_np = trailed_rust.compute_ect_channels_backward(
             nh_np, batch_np, channels_np, lin_np, grad_output_np, scale
         )
 

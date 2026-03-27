@@ -10,7 +10,7 @@ from typing import Optional
 import numpy as np
 from numpy.typing import NDArray
 
-import dect_rust
+import trailed_rust
 from dect.sampling import generate_directions as _generate_directions
 
 
@@ -77,7 +77,7 @@ def compute_ect_from_numpy(
     nh = points @ directions
 
     # Generate linear thresholds
-    lin = dect_rust.generate_lin(radius, resolution)
+    lin = trailed_rust.generate_lin(radius, resolution)
 
     # Handle groups
     if group_ids is None:
@@ -93,20 +93,20 @@ def compute_ect_from_numpy(
         max_channels = int(channels.max()) + 1
 
         if parallel:
-            ect = dect_rust.compute_ect_channels_forward_parallel(
+            ect = trailed_rust.compute_ect_channels_forward_parallel(
                 nh, batch, channels, lin, dim_size, max_channels, scale
             )
         else:
-            ect = dect_rust.compute_ect_channels_forward(
+            ect = trailed_rust.compute_ect_channels_forward(
                 nh, batch, channels, lin, dim_size, max_channels, scale
             )
     else:
         if parallel:
-            ect = dect_rust.compute_ect_points_forward_parallel(
+            ect = trailed_rust.compute_ect_points_forward_parallel(
                 nh, batch, lin, dim_size, scale
             )
         else:
-            ect = dect_rust.compute_ect_points_forward(nh, batch, lin, dim_size, scale)
+            ect = trailed_rust.compute_ect_points_forward(nh, batch, lin, dim_size, scale)
 
     # Normalize if requested
     if normalized:

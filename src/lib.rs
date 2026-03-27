@@ -493,7 +493,7 @@ fn compute_node_heights<'py>(
 // ============================================================================
 
 #[pymodule]
-fn dect_rust(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn trailed_rust(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     // Direction generation
     m.add_function(wrap_pyfunction!(generate_uniform_directions, m)?)?;
     m.add_function(wrap_pyfunction!(generate_2d_directions, m)?)?;

@@ -11,7 +11,7 @@ import torch
 import torch.nn as nn
 from torch import Tensor
 
-import dect_rust
+import trailed_rust
 
 from .config import EctConfig, generate_directions
 from .autograd import (
@@ -216,13 +216,13 @@ class FastEctLayer(nn.Module):
         nh_np = nh.detach().cpu().numpy()
 
         if batch is None:
-            out_np = dect_rust.compute_fast_ect(nh_np, self.config.resolution)
+            out_np = trailed_rust.compute_fast_ect(nh_np, self.config.resolution)
             out = torch.from_numpy(out_np).to(x.device)
             return out.unsqueeze(0)
         else:
             batch_np = batch.detach().cpu().numpy()
             dim_size = batch.max().item() + 1
-            out_np = dect_rust.compute_fast_ect_batched(
+            out_np = trailed_rust.compute_fast_ect_batched(
                 nh_np, batch_np, dim_size, self.config.resolution
             )
             return torch.from_numpy(out_np).to(x.device)

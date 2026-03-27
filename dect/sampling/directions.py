@@ -10,7 +10,7 @@ from typing import Literal
 import numpy as np
 from numpy.typing import NDArray
 
-import dect_rust
+import trailed_rust
 
 
 def generate_uniform_directions(
@@ -46,7 +46,7 @@ def generate_uniform_directions(
     >>> np.allclose(np.linalg.norm(v, axis=0), 1.0)
     True
     """
-    return dect_rust.generate_uniform_directions(num_thetas, ambient_dim, seed)
+    return trailed_rust.generate_uniform_directions(num_thetas, ambient_dim, seed)
 
 
 def generate_2d_directions(num_thetas: int) -> NDArray:
@@ -72,7 +72,7 @@ def generate_2d_directions(num_thetas: int) -> NDArray:
     >>> v.shape
     (2, 8)
     """
-    return dect_rust.generate_2d_directions(num_thetas)
+    return trailed_rust.generate_2d_directions(num_thetas)
 
 
 def generate_multiview_directions(
@@ -104,7 +104,7 @@ def generate_multiview_directions(
     >>> v.shape
     (3, 64)
     """
-    return dect_rust.generate_multiview_directions(num_thetas, ambient_dim)
+    return trailed_rust.generate_multiview_directions(num_thetas, ambient_dim)
 
 
 def generate_spherical_grid_directions(
@@ -136,7 +136,7 @@ def generate_spherical_grid_directions(
     >>> v.shape
     (3, 128)
     """
-    return dect_rust.generate_spherical_grid_directions(num_thetas, num_phis)
+    return trailed_rust.generate_spherical_grid_directions(num_thetas, num_phis)
 
 
 def generate_directions(
@@ -236,7 +236,7 @@ def compute_node_heights(
     heights : ndarray of shape (n_points, n_directions)
         Projection of each point onto each direction.
     """
-    return dect_rust.compute_node_heights(
+    return trailed_rust.compute_node_heights(
         x.astype(np.float32),
         v.astype(np.float32),
     )
@@ -257,4 +257,4 @@ def generate_lin(radius: float, resolution: int) -> NDArray:
     lin : ndarray of shape (resolution,)
         Threshold values.
     """
-    return dect_rust.generate_lin(radius, resolution)
+    return trailed_rust.generate_lin(radius, resolution)

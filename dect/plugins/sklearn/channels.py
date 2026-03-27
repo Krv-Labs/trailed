@@ -10,7 +10,7 @@ from typing import Literal, Optional
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
-import dect_rust
+import trailed_rust
 from dect.sampling import generate_directions as _generate_directions_func
 
 
@@ -114,7 +114,7 @@ class EctChannelTransformer:
 
         self.ambient_dim_ = X.shape[2]
         self.directions_ = self._generate_directions(self.ambient_dim_)
-        self._lin = dect_rust.generate_lin(self.radius, self.resolution)
+        self._lin = trailed_rust.generate_lin(self.radius, self.resolution)
 
         if self.max_channels is not None:
             self.n_channels_ = self.max_channels
@@ -171,7 +171,7 @@ class EctChannelTransformer:
             nh = points @ self.directions_
             batch = np.zeros(n_points, dtype=np.int64)
 
-            ect = dect_rust.compute_ect_channels_forward(
+            ect = trailed_rust.compute_ect_channels_forward(
                 nh, batch, ch, self._lin, 1, self.n_channels_, self.scale
             )
 

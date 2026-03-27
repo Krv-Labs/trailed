@@ -9,7 +9,7 @@ from typing import Literal, List, Optional, Union
 
 from numpy.typing import NDArray
 
-import dect_rust
+import trailed_rust
 from dect.sampling import generate_directions as _generate_directions
 
 from .utils import compute_ect_from_dataframe, ect_to_dataframe
@@ -126,7 +126,7 @@ class DataFrameEctTransformer:
         self.directions_ = _generate_directions(
             self.num_thetas, ambient_dim, self.sampling_method, self.seed
         )
-        self._lin = dect_rust.generate_lin(self.radius, self.resolution)
+        self._lin = trailed_rust.generate_lin(self.radius, self.resolution)
         return self
 
     def transform(

@@ -1,10 +1,10 @@
-# DECT
+# TRAILED
 
-A high-performance Rust implementation of the Differentiable Euler Characteristic Transform (DECT), exposed through ergonomic Python bindings.
+A high-performance Rust implementation of the Euler Characteristic Transform (ECT), exposed through ergonomic Python bindings as TRAILED.
 
 ## Features
 
-- Fast Rust core for DECT computation.
+- Fast Rust core for ECT computation.
 - Native Python API for NumPy workflows.
 - Optional integrations for scikit-learn, PyTorch, and dataframe libraries.
 
@@ -14,28 +14,28 @@ A high-performance Rust implementation of the Differentiable Euler Characteristi
 uv pip install -e .
 
 # Optional extras
-pip install dect-rust[sklearn]      # scikit-learn transformers
-pip install dect-rust[torch]        # PyTorch layers
-pip install dect-rust[dataframe]    # pandas + polars
-pip install dect-rust[all]          # all optional dependencies
+pip install trailed[sklearn]      # scikit-learn transformers
+pip install trailed[torch]        # PyTorch layers
+pip install trailed[dataframe]    # pandas + polars
+pip install trailed[all]          # all optional dependencies
 ```
 
 ## Quick Start
 
 ```python
 # NumPy
-from dect import compute_ect_from_numpy
+from trailed import compute_ect_from_numpy
 
 ect = compute_ect_from_numpy(points, num_thetas=32, resolution=32)
 
 # Scikit-learn
-from dect import EctTransformer
+from trailed import EctTransformer
 
 transformer = EctTransformer(num_thetas=32, resolution=32)
 features = transformer.fit_transform(X)  # X: (n_samples, n_points, n_dims)
 
 # PyTorch
-from dect import EctConfig, EctLayer
+from trailed import EctConfig, EctLayer
 
 layer = EctLayer(EctConfig(num_thetas=32, bump_steps=32))
 ect = layer(data)  # torch_geometric Data
