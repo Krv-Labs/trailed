@@ -196,7 +196,9 @@ class TestParallelConsistency:
         lin = generate_lin(1.0, resolution)
 
         ect_seq = trailed_rust.compute_ect_points_forward(nh, batch, lin, 1, 50.0)
-        ect_par = trailed_rust.compute_ect_points_forward_parallel(nh, batch, lin, 1, 50.0)
+        ect_par = trailed_rust.compute_ect_points_forward_parallel(
+            nh, batch, lin, 1, 50.0
+        )
 
         assert np.allclose(ect_seq, ect_par, atol=1e-5)
 
@@ -250,7 +252,9 @@ class TestEctEdges:
         )
         lin = generate_lin(1.0, resolution)
 
-        ect = trailed_rust.compute_ect_edges_forward(nh, batch, edge_index, lin, 1, 50.0)
+        ect = trailed_rust.compute_ect_edges_forward(
+            nh, batch, edge_index, lin, 1, 50.0
+        )
         assert ect.shape == (1, resolution, n_dirs)
 
 
