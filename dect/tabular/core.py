@@ -8,9 +8,9 @@ that other tabular integrations build upon.
 from typing import Optional
 
 import numpy as np
+import trailed_rust
 from numpy.typing import NDArray
 
-import trailed_rust
 from dect.sampling import generate_directions as _generate_directions
 
 
@@ -26,6 +26,8 @@ def compute_ect_from_numpy(
     seed: int = 42,
     normalized: bool = False,
     parallel: bool = True,
+    directions: Optional[NDArray] = None,
+    lin: Optional[NDArray] = None,
 ) -> NDArray:
     """Compute ECT from numpy arrays.
 
@@ -70,14 +72,26 @@ def compute_ect_from_numpy(
 
     n_points, ambient_dim = points.shape
 
-    # Generate directions
-    directions = _generate_directions(num_thetas, ambient_dim, sampling_method, seed)
+    # Generate or reuse directions
+    if directions is None:
+        directions = _generate_directions(
+            num_thetas, ambient_dim, sampling_method, seed
+        )
+    else:
+        directions = np.asarray(directions, dtype=np.float32)
+        if directions.shape[0] != ambient_dim:
+            raise ValueError(
+                f"Expected directions with first dim {ambient_dim}, got {directions.shape[0]}"
+            )
 
     # Compute node heights
     nh = points @ directions
 
-    # Generate linear thresholds
-    lin = trailed_rust.generate_lin(radius, resolution)
+    # Generate or reuse linear thresholds
+    if lin is None:
+        lin = trailed_rust.generate_lin(radius, resolution)
+    else:
+        lin = np.asarray(lin, dtype=np.float32)
 
     # Handle groups
     if group_ids is None:
