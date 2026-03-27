@@ -281,6 +281,10 @@ pub fn compute_fast_ect(nh: &Array2<f32>, resolution: usize) -> Array2<f32> {
     let n = nh.shape()[0];
     let t = nh.shape()[1];
 
+    if resolution == 0 {
+        return Array2::<f32>::zeros((0, t));
+    }
+
     let mut out = Array2::<f32>::zeros((resolution, t));
 
     for i in 0..n {
@@ -320,6 +324,10 @@ pub fn compute_fast_ect_batched(
 ) -> Array3<f32> {
     let n = nh.shape()[0];
     let t = nh.shape()[1];
+
+    if resolution == 0 {
+        return Array3::<f32>::zeros((dim_size, 0, t));
+    }
 
     let mut out = Array3::<f32>::zeros((dim_size, resolution, t));
 
@@ -594,7 +602,17 @@ pub fn compute_node_heights(x: &Array2<f32>, v: &Array2<f32>) -> Array2<f32> {
 /// # Returns
 /// Array of threshold values of shape [resolution]
 pub fn generate_lin(radius: f32, resolution: usize) -> Array1<f32> {
+    if resolution == 0 {
+        return Array1::<f32>::zeros(0);
+    }
+
     let mut lin = Array1::<f32>::zeros(resolution);
+
+    if resolution == 1 {
+        lin[0] = 0.0;
+        return lin;
+    }
+
     for i in 0..resolution {
         lin[i] = -radius + (2.0 * radius * i as f32) / (resolution as f32 - 1.0);
     }
