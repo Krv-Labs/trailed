@@ -8,9 +8,9 @@ differentiable ECT features from point clouds.
 from typing import Literal, Optional
 
 import numpy as np
+import trailed_rust
 from numpy.typing import ArrayLike, NDArray
 
-import trailed_rust
 from dect.sampling import generate_directions as _generate_directions_func
 
 
@@ -155,13 +155,13 @@ class EctTransformer:
         n_points = X.shape[1]
 
         if self.parallel:
-            # Batched computation: compute node heights for all samples and call
-            # the Rust batch API once to reduce Python overhead.
-            nh = X @ self.directions_  # shape: (n_samples, n_points, num_thetas)
-            batch_sizes = np.full(n_samples, n_points, dtype=np.int64)
-
+            # Batched computation in Rust across all samples.
             ects = trailed_rust.compute_ect_batch_parallel(
-                nh, batch_sizes, self._lin, self.scale
+                X,
+                self.directions_,
+                self.radius,
+                self.resolution,
+                self.scale,
             )
 
             if self.normalized:
