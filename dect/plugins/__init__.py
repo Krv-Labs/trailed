@@ -6,14 +6,16 @@ This submodule provides optional integrations with popular ML frameworks:
 - torch: PyTorch layers and autograd functions
 """
 
+# ruff: noqa: F401
+
 __all__ = []
 
 # Conditionally export sklearn classes
 try:
     from .sklearn import (
+        EctChannelTransformer,
         EctTransformer,
         FastEctTransformer,
-        EctChannelTransformer,
     )
 
     __all__.extend(
@@ -29,14 +31,14 @@ except ImportError:
 # Conditionally export torch classes
 try:
     from .torch import (
+        EctChannelsFunction,
         EctConfig,
-        EctLayer,
-        FastEctLayer,
-        EctPointsFunction,
-        EctPointsDerivativeFunction,
         EctEdgesFunction,
         EctFacesFunction,
-        EctChannelsFunction,
+        EctLayer,
+        EctPointsDerivativeFunction,
+        EctPointsFunction,
+        FastEctLayer,
         compute_ect,
         generate_directions,
     )

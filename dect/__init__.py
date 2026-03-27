@@ -5,16 +5,18 @@ A fast Rust-based implementation of the ECT with Python bindings
 for point clouds, graphs, and meshes.
 """
 
+# ruff: noqa: F401
+
 # Import from submodules for backward compatibility
 from .sampling import (
-    generate_directions,
-    generate_uniform_directions,
+    compute_node_heights,
     generate_2d_directions,
+    generate_directions,
+    generate_lin,
     generate_multiview_directions,
     generate_spherical_grid_directions,
+    generate_uniform_directions,
     normalize_directions,
-    compute_node_heights,
-    generate_lin,
 )
 
 __all__ = [
@@ -32,14 +34,14 @@ __all__ = [
 # Conditionally import PyTorch components
 try:
     from .plugins.torch import (
+        EctChannelsFunction,
         EctConfig,
-        EctLayer,
-        FastEctLayer,
-        EctPointsFunction,
-        EctPointsDerivativeFunction,
         EctEdgesFunction,
         EctFacesFunction,
-        EctChannelsFunction,
+        EctLayer,
+        EctPointsDerivativeFunction,
+        EctPointsFunction,
+        FastEctLayer,
         compute_ect,
     )
 
@@ -66,9 +68,9 @@ except ImportError:
 # Conditionally import sklearn components
 try:
     from .plugins.sklearn import (
+        EctChannelTransformer,
         EctTransformer,
         FastEctTransformer,
-        EctChannelTransformer,
     )
 
     __all__.extend(
@@ -84,12 +86,12 @@ except ImportError:
 # Conditionally import DataFrame components
 try:
     from .tabular import (
+        DataFrameEctTransformer,
+        compute_ect_from_dataframe,
         compute_ect_from_numpy,
         compute_ect_from_pandas,
         compute_ect_from_polars,
-        compute_ect_from_dataframe,
         ect_to_dataframe,
-        DataFrameEctTransformer,
     )
 
     __all__.extend(
