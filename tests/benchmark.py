@@ -30,18 +30,16 @@ def _run_layer(
 ) -> float:
     config = dect_pkg.EctConfig(
         num_thetas=num_thetas,
-        bump_steps=bump_steps,
+        resolution=bump_steps,
         ect_type=ect_type,
-        num_features=num_features,
+        ambient_dim=num_features,
     )
 
     v = torch.randn(num_features, num_thetas)
     v /= v.pow(2).sum(axis=0).sqrt()
-    layer = dect_pkg.EctLayer(config, V=v)
+    layer = dect_pkg.EctLayer(config, directions=v)
 
-    data = _make_data(
-        ect_type=ect_type, num_nodes=num_nodes, num_features=num_features
-    )
+    data = _make_data(ect_type=ect_type, num_nodes=num_nodes, num_features=num_features)
 
     # Warmup before timing to avoid one-time overheads.
     layer(data).sum().backward()

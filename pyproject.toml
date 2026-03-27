@@ -3,24 +3,79 @@ requires = ["maturin>=1.0,<2.0"]
 build-backend = "maturin"
 
 [project]
-name = "dect-rust"
+name = "trailed"
 version = "0.1.0"
-description = "A fast package to compute the Euler Characteristic Transform in Rust"
+authors = [
+    { name="Krv Labs", email="team@krv.ai" },
+]
+description = "TRAILED: Topological Regularization and Integrity Learning for EHR Data"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "numpy",
-    "torch",
-    "torch_geometric"
+    "numpy>=1.20",
+]
+
+[project.optional-dependencies]
+torch = [
+    "torch>=2.0",
+]
+torch-geometric = [
+    "torch>=2.0",
+    "torch_geometric>=2.0",
+]
+sklearn = [
+    "scikit-learn>=1.0",
+]
+dataframe = [
+    "pandas>=1.5",
+    "polars>=0.20",
+]
+all = [
+    "torch>=2.0",
+    "torch_geometric>=2.0",
+    "scikit-learn>=1.0",
+    "pandas>=1.5",
+    "polars>=0.20",
 ]
 
 [dependency-groups]
 tests = [
+    "ruff>=0.15.7",
     "dect @ git+https://github.com/aidos-lab/DECT/",
+    "pandas>=1.5",
+    "polars",
     "pytest",
     "pytest-cov",
+    "torch>=2.0",
+    "scikit-learn>=1.0",
+    "torch-geometric>=2.7.0",
 ]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py", "compare.py", "benchmark.py"]
+
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+module-name = "trailed_rust"
+python-packages = ["dect", "trailed"]
+exclude = [
+    "tests/**",
+    ".github/**",
+    ".claude/**",
+    ".cursor/**",
+    ".pytest_cache/**",
+    ".ruff_cache/**",
+    ".venv/**",
+    "target/**",
+    ".coverage",
+    "*.lock",
+]
+
+
+[[tool.uv.index]]
+name = "research"
+url = "https://api.pyx.dev/simple/krv/research"
+publish-url = "https://api.pyx.dev/v1/upload/krv/research"
+explicit=true
