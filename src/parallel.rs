@@ -120,6 +120,10 @@ pub fn compute_fast_ect_parallel(
     let n = nh.shape()[0];
     let t = nh.shape()[1];
 
+    if resolution == 0 {
+        return Array2::<f32>::zeros((0, t));
+    }
+
     let cols: Vec<Array1<f32>> = (0..t)
         .into_par_iter()
         .map(|j| {
@@ -160,6 +164,10 @@ pub fn compute_fast_ect_batched_parallel(
 ) -> Array3<f32> {
     let n = nh.shape()[0];
     let t = nh.shape()[1];
+
+    if resolution == 0 {
+        return Array3::<f32>::zeros((dim_size, 0, t));
+    }
 
     let slices: Vec<Array2<f32>> = (0..t)
         .into_par_iter()
@@ -306,12 +314,20 @@ pub fn compute_ect_batch_parallel(
     let batch_size = x.shape()[0];
     let num_dirs = v.shape()[1];
 
+    if resolution == 0 {
+        return Array3::<f32>::zeros((batch_size, 0, num_dirs));
+    }
+
     // Generate linear thresholds
-    let lin: Array1<f32> = Array1::from_iter(
-        (0..resolution).map(|i| {
-            -radius + (2.0 * radius * i as f32) / (resolution as f32 - 1.0)
-        })
-    );
+    let lin: Array1<f32> = if resolution == 1 {
+        Array1::from_vec(vec![0.0])
+    } else {
+        Array1::from_iter(
+            (0..resolution).map(|i| {
+                -radius + (2.0 * radius * i as f32) / (resolution as f32 - 1.0)
+            }),
+        )
+    };
 
     let results: Vec<Array2<f32>> = (0..batch_size)
         .into_par_iter()
