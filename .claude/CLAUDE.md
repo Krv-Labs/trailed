@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Project Context
+
+TRAILED (Topological Regularization and Integrity Learning for EHR Data) is an open-source, high-performance implementation of the Euler Characteristic Transform (ECT). It serves as the ECT foundation layer for topological analysis of structured data — the core primitive for topologically-aware representation learning.
+
 ## Commands
 
 ```bash
