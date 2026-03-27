@@ -154,30 +154,41 @@ class EctTransformer:
         n_samples = X.shape[0]
         n_points = X.shape[1]
 
-        results = []
+        if self.parallel:
+            # Batched computation: compute node heights for all samples and call
+            # the Rust batch API once to reduce Python overhead.
+            nh = X @ self.directions_  # shape: (n_samples, n_points, num_thetas)
+            batch_sizes = np.full(n_samples, n_points, dtype=np.int64)
 
-        for i in range(n_samples):
-            points = X[i]
-            nh = points @ self.directions_
-            batch = np.zeros(n_points, dtype=np.int64)
+            ects = trailed_rust.compute_ect_batch_parallel(
+                nh, batch_sizes, self._lin, self.scale
+            )
 
-            if self.parallel:
-                ect = trailed_rust.compute_ect_points_forward_parallel(
-                    nh, batch, self._lin, 1, self.scale
-                )
-            else:
+            if self.normalized:
+                # Normalize each sample independently.
+                max_per_sample = np.max(ects, axis=(1, 2), keepdims=True)
+                ects = ects / (max_per_sample + 1e-8)
+        else:
+            # Non-parallel path: preserve original per-sample behavior.
+            results = []
+
+            for i in range(n_samples):
+                points = X[i]
+                nh = points @ self.directions_
+                batch = np.zeros(n_points, dtype=np.int64)
+
                 ect = trailed_rust.compute_ect_points_forward(
                     nh, batch, self._lin, 1, self.scale
                 )
 
-            ect = ect[0]  # Remove batch dimension
+                ect = ect[0]  # Remove batch dimension
 
-            if self.normalized:
-                ect = ect / (np.max(ect) + 1e-8)
+                if self.normalized:
+                    ect = ect / (np.max(ect) + 1e-8)
 
-            results.append(ect)
+                results.append(ect)
 
-        ects = np.stack(results, axis=0)
+            ects = np.stack(results, axis=0)
 
         if self.flatten:
             return ects.reshape(n_samples, -1)
