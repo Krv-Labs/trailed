@@ -96,8 +96,12 @@ pub fn generate_multiview_directions(num_thetas: usize, d: usize) -> Array2<f32>
             num_directions_per_circle
         };
 
+        if num_t == 0 {
+            continue;
+        }
+
         for t in 0..num_t {
-            let theta = 2.0 * PI * (t as f32) / ((num_directions_per_circle + remainder) as f32);
+            let theta = 2.0 * PI * (t as f32) / (num_t as f32);
             v[[i1, col_offset + t]] = theta.sin();
             v[[i2, col_offset + t]] = theta.cos();
         }
