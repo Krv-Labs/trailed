@@ -44,7 +44,7 @@ features = transformer.fit_transform(X)  # X: (n_samples, n_points, n_dims)
 # PyTorch
 from trailed import EctConfig, EctLayer
 
-layer = EctLayer(EctConfig(num_thetas=32, bump_steps=32))
+layer = EctLayer(EctConfig(num_thetas=32, resolution=32))
 ect = layer(data)  # torch_geometric Data
 ```
 
