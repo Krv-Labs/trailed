@@ -1,4 +1,4 @@
-use ndarray::{Array1, Array2};
+use ndarray::Array2;
 use rand::SeedableRng;
 use rand_distr::{Distribution, StandardNormal};
 use std::f32::consts::PI;

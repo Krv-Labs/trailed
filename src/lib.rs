@@ -1,7 +1,6 @@
 use pyo3::prelude::*;
 use numpy::{PyReadonlyArray1, PyReadonlyArray2, PyReadonlyArray3, PyReadonlyArray4,
-            PyArray1, PyArray2, PyArray3, PyArray4, IntoPyArray, PyUntypedArrayMethods};
-use ndarray::{Array1, Array2, Array3, Array4};
+            PyArray1, PyArray2, PyArray3, PyArray4, IntoPyArray};
 
 mod directions;
 mod ect;
@@ -53,6 +52,16 @@ fn generate_spherical_grid_directions<'py>(
 ) -> Bound<'py, PyArray2<f32>> {
     let v = directions::generate_spherical_grid_directions(num_thetas, num_phis);
     v.into_pyarray(py)
+}
+
+#[pyfunction]
+#[pyo3(signature = (v))]
+fn normalize_directions<'py>(
+    py: Python<'py>,
+    v: PyReadonlyArray2<f32>,
+) -> Bound<'py, PyArray2<f32>> {
+    let out = directions::normalize_directions(&v.as_array().to_owned());
+    out.into_pyarray(py)
 }
 
 // ============================================================================
@@ -419,6 +428,40 @@ fn compute_ect_channels_forward_parallel<'py>(
     out.into_pyarray(py)
 }
 
+#[pyfunction]
+#[pyo3(signature = (x, v))]
+fn compute_node_heights_batch_parallel<'py>(
+    py: Python<'py>,
+    x: PyReadonlyArray3<f32>,
+    v: PyReadonlyArray2<f32>,
+) -> Bound<'py, PyArray3<f32>> {
+    let nh = parallel::batch_matmul_parallel(
+        &x.as_array().to_owned(),
+        &v.as_array().to_owned(),
+    );
+    nh.into_pyarray(py)
+}
+
+#[pyfunction]
+#[pyo3(signature = (x, v, radius, resolution, scale=50.0))]
+fn compute_ect_batch_parallel<'py>(
+    py: Python<'py>,
+    x: PyReadonlyArray3<f32>,
+    v: PyReadonlyArray2<f32>,
+    radius: f32,
+    resolution: usize,
+    scale: f32,
+) -> Bound<'py, PyArray3<f32>> {
+    let out = parallel::compute_ect_batch_parallel(
+        &x.as_array().to_owned(),
+        &v.as_array().to_owned(),
+        radius,
+        resolution,
+        scale,
+    );
+    out.into_pyarray(py)
+}
+
 // ============================================================================
 // Utility Functions
 // ============================================================================
@@ -456,6 +499,7 @@ fn dect_rust(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(generate_2d_directions, m)?)?;
     m.add_function(wrap_pyfunction!(generate_multiview_directions, m)?)?;
     m.add_function(wrap_pyfunction!(generate_spherical_grid_directions, m)?)?;
+    m.add_function(wrap_pyfunction!(normalize_directions, m)?)?;
     
     // ECT - Points
     m.add_function(wrap_pyfunction!(compute_ect_points_forward, m)?)?;
@@ -485,6 +529,8 @@ fn dect_rust(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(compute_fast_ect_parallel, m)?)?;
     m.add_function(wrap_pyfunction!(compute_fast_ect_batched_parallel, m)?)?;
     m.add_function(wrap_pyfunction!(compute_ect_channels_forward_parallel, m)?)?;
+    m.add_function(wrap_pyfunction!(compute_node_heights_batch_parallel, m)?)?;
+    m.add_function(wrap_pyfunction!(compute_ect_batch_parallel, m)?)?;
     
     // Utilities
     m.add_function(wrap_pyfunction!(generate_lin, m)?)?;

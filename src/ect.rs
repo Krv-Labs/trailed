@@ -1,4 +1,4 @@
-use ndarray::{Array1, Array2, Array3, Array4, Axis};
+use ndarray::{Array1, Array2, Array3, Array4};
 
 /// Compute the sigmoid function: 1 / (1 + exp(-x))
 #[inline]
