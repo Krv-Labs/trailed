@@ -106,7 +106,9 @@ def compute_ect_from_numpy(
                 nh, batch, lin, dim_size, scale
             )
         else:
-            ect = trailed_rust.compute_ect_points_forward(nh, batch, lin, dim_size, scale)
+            ect = trailed_rust.compute_ect_points_forward(
+                nh, batch, lin, dim_size, scale
+            )
 
     # Normalize if requested
     if normalized:
