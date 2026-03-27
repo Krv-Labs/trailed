@@ -33,6 +33,8 @@ def compute_ect_from_pandas(
     seed: int = 42,
     normalized: bool = False,
     parallel: bool = True,
+    directions: Optional[NDArray] = None,
+    lin: Optional[NDArray] = None,
 ) -> NDArray:
     """Compute ECT from a pandas DataFrame.
 
@@ -124,4 +126,6 @@ def compute_ect_from_pandas(
         seed=seed,
         normalized=normalized,
         parallel=parallel,
+        directions=directions,
+        lin=lin,
     )
