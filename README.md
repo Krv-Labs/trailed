@@ -32,9 +32,6 @@ layer = EctLayer(EctConfig(num_thetas=32, resolution=32))
 ect = layer(data)  # gradients flow through
 ```
 
-## Documentation
-
-Full documentation: [krv-analytics.github.io/trailed](https://krv-analytics.github.io/trailed/)
 
 ## Acknowledgment
 
