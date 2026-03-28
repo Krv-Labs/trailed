@@ -10,7 +10,7 @@ TRAILED
 
    TRAILED is under active development. The current release provides the foundational ECT (Euler Characteristic Transform) implementation. Healthcare-specific methods — including density-aware descriptors, patient manifold construction, and clinical fidelity metrics — are in progress.
 
-TRAILED provides topological representation learning methods for Electronic Health Record (EHR) data. Built on the differentiable Euler Characteristic Transform (ECT), TRAILED enables topological analysis of patient trajectories, synthetic data validation, and clinical fidelity assessment.
+TRAILED is a topological representation learning library for Electronic Health Record (EHR) data. It provides methods for analyzing patient trajectories, validating synthetic data, and assessing clinical fidelity using topological techniques.
 
 Quick Links
 -----------
@@ -43,22 +43,24 @@ Quick Links
 
       Full API documentation for TRAILED modules.
 
-What is TRAILED?
-----------------
+Why TRAILED?
+------------
 
-TRAILED addresses two persistent challenges in longitudinal EHR analysis and synthetic data generation:
+Longitudinal EHR analysis and synthetic data generation face two persistent challenges that standard metrics fail to detect:
 
-**Mode Collapse Detection**
-   Rare but clinically significant phenotypes are often underrepresented or absent in synthetic data. Standard statistical metrics fail to detect these gaps. TRAILED's topological descriptors capture higher-order structure, revealing coverage failures invisible to coordinate-based methods.
+**Mode Collapse**
+   Rare but clinically significant phenotypes — pediatric rare diseases, underrepresented demographics — are often absent from synthetic datasets. Models trained on such data fail silently on these populations. Pairwise statistical metrics miss these coverage gaps because they cannot capture higher-order structure.
 
 **Pathological Interpolation**
-   Synthetic patient trajectories may pass through biologically implausible states — impossible lab value transitions, contradictory comorbidities, or clinically incoherent sequences. TRAILED characterizes the patient manifold to distinguish viable pathways from "No-Go" regions.
+   Generative models produce synthetic patient trajectories that pass through biologically implausible states: impossible lab value transitions, contradictory comorbidities, or clinically incoherent sequences. These failures create safety risks and degrade downstream model reliability.
+
+TRAILED addresses these problems using **topological methods** that capture global structure in patient trajectory spaces — detecting patterns invisible to coordinate-based metrics.
 
 Core Capabilities
 -----------------
 
-- **Topological Descriptors**: ECT-based representations that capture shape and structure in clinical latent spaces
-- **Differentiable**: Full gradient support for end-to-end learning and training-time regularization
+- **Topological Descriptors**: Representations that capture shape and structure in clinical latent spaces
+- **Differentiable**: Full gradient support for training-time regularization of generative models
 - **Patient Manifold Analysis**: Characterize trajectory spaces and identify impossible state transitions
 - **Fidelity Metrics**: Quantify real-vs-synthetic alignment in coordinate-free topological space
 
@@ -72,34 +74,32 @@ Architecture
          A[Patient Embeddings / Trajectories]
       end
 
-      subgraph "Topological Core"
-         B["Direction sampling"]
-         C["Filtration"]
-         D["ECT computation"]
-      end
-
-      subgraph "Output"
-         E["Topological Descriptor"]
-         F["Fidelity Score"]
+      subgraph "TRAILED Core"
+         B["Topological Analysis"]
+         C["Manifold Construction"]
+         D["Fidelity Scoring"]
       end
 
       subgraph "Applications"
-         G["Training Regularizer"]
-         H["Quality Assessment"]
+         E["Training Regularizer"]
+         F["Synthetic Data QA"]
+         G["Trajectory Analysis"]
       end
 
       A --> B
-      B --> C
+      A --> C
+      B --> D
       C --> D
       D --> E
-      E --> F
-      E --> G
-      E --> H
+      D --> F
+      D --> G
 
       style Input fill:#f9f9f9,stroke:#999
       style B fill:#D9EDF7,stroke:#31708F,stroke-width:2px
-      style D fill:#D9EDF7,stroke:#31708F,stroke-width:2px
-      style E fill:#DFF0D8,stroke:#3C763D,stroke-width:2px
+      style D fill:#DFF0D8,stroke:#3C763D,stroke-width:2px
+
+Example Usage
+-------------
 
 **Computing Topological Descriptors**
 
@@ -120,38 +120,20 @@ Architecture
 
    ect_layer = EctLayer(EctConfig(num_thetas=32, resolution=32))
 
-   # Regularize generative model
-   real_ect = ect_layer(real_batch)
-   synthetic_ect = ect_layer(generated_batch)
-   topo_loss = torch.nn.functional.mse_loss(synthetic_ect, real_ect)
+   # Regularize generative model to preserve topological structure
+   real_topo = ect_layer(real_batch)
+   synthetic_topo = ect_layer(generated_batch)
+   topo_loss = torch.nn.functional.mse_loss(synthetic_topo, real_topo)
 
-**sklearn Pipeline**
+**Synthetic Data Fidelity**
 
 .. code-block:: python
 
-   from sklearn.pipeline import Pipeline
-   from sklearn.svm import SVC
-   from trailed.sklearn import ECTTransformer
+   # Compare topological structure of real vs synthetic cohorts
+   real_descriptor = compute_ect_from_numpy(real_embeddings, num_thetas=64, resolution=64)
+   synthetic_descriptor = compute_ect_from_numpy(synthetic_embeddings, num_thetas=64, resolution=64)
 
-   pipe = Pipeline([
-       ("ect", ECTTransformer(num_thetas=32)),
-       ("clf", SVC()),
-   ])
-
-Key Features
-------------
-
-**Differentiable ECT**
-   Optimized implementation supporting forward and backward passes for gradient-based optimization.
-
-**Direction Sampling**
-   Configurable strategies for sampling directions — uniform, stratified, or custom direction sets.
-
-**Resolution Control**
-   Adjustable filtration resolution for trading off detail vs. computation time.
-
-**Framework Integration**
-   First-class support for NumPy, pandas, sklearn, and PyTorch workflows.
+   fidelity_score = np.linalg.norm(real_descriptor - synthetic_descriptor)
 
 Installation
 ------------
@@ -190,9 +172,9 @@ Next Steps
 ----------
 
 - :ref:`Quickstart <quickstart>` - Compute your first topological descriptor
+- :ref:`Overview <overview>` - Technical background and roadmap
 - :ref:`User Guide <user_guide>` - Installation and configuration
 - :ref:`API Reference <api-reference>` - Full class and function docs
-- :ref:`Integrations <integrations>` - sklearn and PyTorch adapters
 
 .. toctree::
    :maxdepth: 2
