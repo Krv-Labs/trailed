@@ -1,59 +1,40 @@
 # TRAILED: Topological Regularization and Integrity Learning for EHR Data
 
-A high-performance Rust implementation of the Euler Characteristic Transform (ECT), exposed through ergonomic Python bindings. TRAILED provides the ECT foundation for topological analysis of structured data — including patient trajectories, point clouds, graphs, and simplicial complexes.
+> **Note**: TRAILED is under active development. The current release provides the foundational ECT implementation. Healthcare-specific methods are in progress.
 
-## Overview
-
-The Euler Characteristic Transform (ECT) is a provably injective topological descriptor — it encodes the shape of a dataset losslessly, without relying on coordinates or distance metrics. TRAILED implements a differentiable ECT, enabling it to be used as both a feature extractor and a training-time regularizer in deep learning pipelines.
-
-This library is the open-source ECT core. It is designed to be embedded into larger systems that require topologically-aware representations of structured or sequential data.
-
-## Features
-
-- Fast Rust core for ECT computation.
-- Differentiable: supports forward and backward passes for use as a loss or layer.
-- Native Python API for NumPy workflows.
-- Optional integrations for scikit-learn, PyTorch, and dataframe libraries.
+Topological representation learning for Electronic Health Record (EHR) data. Built on the differentiable Euler Characteristic Transform (ECT).
 
 ## Installation
 
 ```bash
-uv pip install -e .
+uv pip install trailed
 
 # Optional extras
-pip install trailed[sklearn]      # scikit-learn transformers
-pip install trailed[torch]        # PyTorch layers
-pip install trailed[dataframe]    # pandas + polars
-pip install trailed[all]          # all optional dependencies
+uv pip install trailed[sklearn]      # scikit-learn transformers
+uv pip install trailed[torch]        # PyTorch layers
+uv pip install trailed[all]          # all dependencies
 ```
 
 ## Quick Start
 
 ```python
-# NumPy
 from trailed import compute_ect_from_numpy
 
-ect = compute_ect_from_numpy(points, num_thetas=32, resolution=32)
+# Compute topological descriptor
+ect = compute_ect_from_numpy(patient_embeddings, num_thetas=32, resolution=32)
+```
 
-# Scikit-learn
-from trailed import EctTransformer
-
-transformer = EctTransformer(num_thetas=32, resolution=32)
-features = transformer.fit_transform(X)  # X: (n_samples, n_points, n_dims)
-
-# PyTorch
-from trailed import EctConfig, EctLayer
+```python
+# PyTorch — differentiable for use as training regularizer
+from trailed.torch import EctLayer, EctConfig
 
 layer = EctLayer(EctConfig(num_thetas=32, resolution=32))
-ect = layer(data)  # torch_geometric Data
+ect = layer(data)  # gradients flow through
 ```
 
-## Running Tests
+## Documentation
 
-```bash
-uv sync --group tests
-uv run pytest
-```
+Full documentation: [krv-analytics.github.io/trailed](https://krv-analytics.github.io/trailed/)
 
 ## Acknowledgment
 
