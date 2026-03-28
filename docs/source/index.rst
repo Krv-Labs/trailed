@@ -4,9 +4,13 @@
 TRAILED
 =======
 
-**Differentiable Euler Characteristic Transform for Python**
+**Topological Regularization and Integrity Learning for EHR Data**
 
-TRAILED provides fast, differentiable ECT (Euler Characteristic Transform) computation with seamless NumPy, pandas, sklearn, and PyTorch integration. Use topological descriptors for machine learning, shape analysis, and data exploration.
+.. warning::
+
+   TRAILED is under active development. The current release provides the foundational ECT (Euler Characteristic Transform) implementation. Healthcare-specific methods — including density-aware descriptors, patient manifold construction, and clinical fidelity metrics — are in progress.
+
+TRAILED provides topological representation learning methods for Electronic Health Record (EHR) data. Built on the differentiable Euler Characteristic Transform (ECT), TRAILED enables topological analysis of patient trajectories, synthetic data validation, and clinical fidelity assessment.
 
 Quick Links
 -----------
@@ -21,7 +25,7 @@ Quick Links
       :class-card: intro-card
       :shadow: md
 
-      Compute ECT descriptors from NumPy or pandas in seconds.
+      Compute topological descriptors from patient data in minutes.
 
    .. grid-item-card:: :octicon:`book` User Guide
       :link: user_guide
@@ -29,7 +33,7 @@ Quick Links
       :class-card: intro-card
       :shadow: md
 
-      Installation, configuration, and advanced workflows.
+      Installation, configuration, and clinical workflows.
 
    .. grid-item-card:: :octicon:`code` API Reference
       :link: api-reference
@@ -37,42 +41,51 @@ Quick Links
       :class-card: intro-card
       :shadow: md
 
-      Full API documentation for DECT exports.
+      Full API documentation for TRAILED modules.
 
 What is TRAILED?
 ----------------
 
-The **Euler Characteristic Transform (ECT)** is a topological descriptor that captures shape information through directional filtrations. TRAILED makes ECT computation accessible and efficient for Python workflows:
+TRAILED addresses two persistent challenges in longitudinal EHR analysis and synthetic data generation:
 
-- **Fast computation** from NumPy arrays and pandas DataFrames
-- **Differentiable** for use in gradient-based optimization and neural networks
-- **sklearn-compatible** transformers for ML pipelines
-- **PyTorch integration** for deep learning workflows
+**Mode Collapse Detection**
+   Rare but clinically significant phenotypes are often underrepresented or absent in synthetic data. Standard statistical metrics fail to detect these gaps. TRAILED's topological descriptors capture higher-order structure, revealing coverage failures invisible to coordinate-based methods.
 
-Typical Workflow
-----------------
+**Pathological Interpolation**
+   Synthetic patient trajectories may pass through biologically implausible states — impossible lab value transitions, contradictory comorbidities, or clinically incoherent sequences. TRAILED characterizes the patient manifold to distinguish viable pathways from "No-Go" regions.
+
+Core Capabilities
+-----------------
+
+- **Topological Descriptors**: ECT-based representations that capture shape and structure in clinical latent spaces
+- **Differentiable**: Full gradient support for end-to-end learning and training-time regularization
+- **Patient Manifold Analysis**: Characterize trajectory spaces and identify impossible state transitions
+- **Fidelity Metrics**: Quantify real-vs-synthetic alignment in coordinate-free topological space
+
+Architecture
+------------
 
 .. mermaid::
 
    graph LR
       subgraph Input
-         A[Point cloud / DataFrame]
+         A[Patient Embeddings / Trajectories]
       end
 
-      subgraph "Core"
+      subgraph "Topological Core"
          B["Direction sampling"]
          C["Filtration"]
          D["ECT computation"]
       end
 
       subgraph "Output"
-         E["Descriptor vector"]
-         F["Distance matrix"]
+         E["Topological Descriptor"]
+         F["Fidelity Score"]
       end
 
-      subgraph "Integration"
-         G["sklearn pipeline"]
-         H["PyTorch model"]
+      subgraph "Applications"
+         G["Training Regularizer"]
+         H["Quality Assessment"]
       end
 
       A --> B
@@ -88,15 +101,29 @@ Typical Workflow
       style D fill:#D9EDF7,stroke:#31708F,stroke-width:2px
       style E fill:#DFF0D8,stroke:#3C763D,stroke-width:2px
 
-**NumPy / pandas**
+**Computing Topological Descriptors**
 
 .. code-block:: python
 
    import numpy as np
    from trailed import compute_ect_from_numpy
 
-   points = np.random.randn(100, 3)
-   descriptor = compute_ect_from_numpy(points, num_thetas=32, resolution=64)
+   # Patient embeddings from EHR data
+   patient_embeddings = np.load("embeddings.npy")
+   descriptor = compute_ect_from_numpy(patient_embeddings, num_thetas=32, resolution=64)
+
+**Training Regularization**
+
+.. code-block:: python
+
+   from trailed.torch import EctLayer, EctConfig
+
+   ect_layer = EctLayer(EctConfig(num_thetas=32, resolution=32))
+
+   # Regularize generative model
+   real_ect = ect_layer(real_batch)
+   synthetic_ect = ect_layer(generated_batch)
+   topo_loss = torch.nn.functional.mse_loss(synthetic_ect, real_ect)
 
 **sklearn Pipeline**
 
@@ -111,24 +138,14 @@ Typical Workflow
        ("clf", SVC()),
    ])
 
-**PyTorch**
-
-.. code-block:: python
-
-   import torch
-   from trailed.torch import DifferentiableECT
-
-   ect_layer = DifferentiableECT(num_thetas=32, resolution=64)
-   descriptor = ect_layer(point_cloud_tensor)
-
 Key Features
 ------------
 
-**Fast ECT Computation**
-   Optimized algorithms for computing Euler characteristic curves across multiple directions.
+**Differentiable ECT**
+   Optimized implementation supporting forward and backward passes for gradient-based optimization.
 
 **Direction Sampling**
-   Configurable strategies for sampling directions on the unit sphere (uniform, stratified, custom).
+   Configurable strategies for sampling directions — uniform, stratified, or custom direction sets.
 
 **Resolution Control**
    Adjustable filtration resolution for trading off detail vs. computation time.
@@ -136,23 +153,28 @@ Key Features
 **Framework Integration**
    First-class support for NumPy, pandas, sklearn, and PyTorch workflows.
 
-**Differentiable**
-   Full gradient support for end-to-end learning with topological features.
-
 Installation
 ------------
 
+We recommend installing with `uv <https://docs.astral.sh/uv/>`_ for fast, reliable dependency resolution:
+
 .. code-block:: bash
 
-   pip install trailed
+   uv pip install trailed
 
 With optional dependencies:
 
 .. code-block:: bash
 
-   pip install trailed[sklearn]     # sklearn integration
-   pip install trailed[torch]       # PyTorch integration
-   pip install trailed[all]         # everything
+   uv pip install trailed[sklearn]     # sklearn integration
+   uv pip install trailed[torch]       # PyTorch integration
+   uv pip install trailed[all]         # everything
+
+Or with pip:
+
+.. code-block:: bash
+
+   pip install trailed
 
 For development:
 
@@ -167,7 +189,7 @@ Supports Python 3.10, 3.11, 3.12.
 Next Steps
 ----------
 
-- :ref:`Quickstart <quickstart>` - Compute your first ECT descriptor
+- :ref:`Quickstart <quickstart>` - Compute your first topological descriptor
 - :ref:`User Guide <user_guide>` - Installation and configuration
 - :ref:`API Reference <api-reference>` - Full class and function docs
 - :ref:`Integrations <integrations>` - sklearn and PyTorch adapters

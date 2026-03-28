@@ -4,7 +4,11 @@
 User Guide
 ==========
 
-From installation to advanced usage—everything you need to compute ECT descriptors effectively.
+From installation to advanced usage — everything you need to compute topological descriptors for EHR data.
+
+.. note::
+
+   TRAILED is under active development. The current release provides the foundational ECT implementation. Healthcare-specific extensions are in progress.
 
 Getting Started
 ---------------
@@ -27,7 +31,7 @@ Getting Started
       :class-card: intro-card
       :shadow: md
 
-      Compute your first ECT descriptor in 5 minutes.
+      Compute your first topological descriptor in 5 minutes.
 
    .. grid-item-card:: :octicon:`code` Programmatic API
       :link: userGuides/programmatic

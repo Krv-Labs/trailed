@@ -4,7 +4,36 @@
 Overview
 ========
 
-TRAILED provides **differentiable Euler Characteristic Transform (ECT)** computation with first-class support for scientific Python workflows. It bridges topological data analysis with modern machine learning.
+TRAILED provides **topological representation learning methods for EHR data**, built on the differentiable Euler Characteristic Transform (ECT). It bridges topological data analysis with clinical machine learning.
+
+.. note::
+
+   TRAILED is under active development. The current release provides the foundational ECT implementation. Healthcare-specific extensions are in progress.
+
+The Problem
+-----------
+
+Longitudinal EHR data and synthetic data generation face two persistent challenges:
+
+**Mode Collapse**
+   Rare but clinically significant phenotypes — pediatric rare diseases, underrepresented demographics — are often absent from synthetic datasets. Models trained on such data fail on these populations. Standard statistical metrics cannot detect these coverage gaps because they rely on pairwise comparisons that miss higher-order structure.
+
+**Pathological Interpolation**
+   Generative models produce synthetic patient trajectories that pass through biologically implausible states: impossible lab value transitions, contradictory comorbidity sequences, or clinically incoherent progressions. These failures degrade downstream model reliability and create safety risks.
+
+Why Topology?
+-------------
+
+Traditional fidelity metrics are **coordinate-dependent** and **local** — they compare distributions point-by-point but cannot capture the global structure of patient trajectory spaces. Topological methods provide:
+
+**Coordinate-Free Representations**
+   ECT descriptors encode shape without relying on specific coordinate systems, making them robust to embedding choices.
+
+**Higher-Order Structure**
+   Topology captures connectivity, holes, and voids — the "shape" of data distributions that pairwise statistics miss.
+
+**Differentiability**
+   TRAILED's implementation supports gradients, enabling topological objectives as training-time regularizers.
 
 What is ECT?
 ------------
@@ -20,7 +49,7 @@ The **Euler Characteristic Transform** is a topological descriptor that captures
 
    graph LR
       subgraph "Input"
-         A["Point cloud"]
+         A["Patient Embeddings"]
       end
 
       subgraph "Direction Sampling"
@@ -36,7 +65,7 @@ The **Euler Characteristic Transform** is a topological descriptor that captures
       end
 
       subgraph "Output"
-         D["Descriptor vector"]
+         D["Topological Descriptor"]
       end
 
       A --> B1
@@ -52,22 +81,33 @@ The **Euler Characteristic Transform** is a topological descriptor that captures
       style A fill:#f9f9f9,stroke:#999
       style D fill:#DFF0D8,stroke:#3C763D,stroke-width:2px
 
-Why ECT?
---------
-
 ECT descriptors have powerful properties:
 
-**Completeness**
-   ECT can distinguish between almost all shapes—it's injective on a dense subset of shapes.
+**Injectivity**
+   ECT can distinguish between almost all shapes — it's injective on a dense subset of shapes.
 
 **Stability**
-   Small perturbations to input shapes produce small changes in descriptors.
+   Small perturbations to input data produce small changes in descriptors.
 
 **Differentiability**
    TRAILED's implementation supports gradients for end-to-end learning.
 
-**Interpretability**
-   Each direction captures different geometric features of the input.
+Roadmap
+-------
+
+TRAILED is being developed in phases:
+
+**Current: ECT Foundation**
+   Fast, differentiable ECT computation with NumPy, sklearn, and PyTorch integrations. This is the building block for healthcare-specific methods.
+
+**Planned: Density-Aware Descriptors**
+   Extensions that fuse topological structure with local density information, addressing limitations of standard ECT for statistical inference.
+
+**Planned: Patient Manifold**
+   Methods for constructing and analyzing patient manifolds from longitudinal EHR embeddings, characterizing viable pathways vs. impossible states.
+
+**Planned: Fidelity Metrics**
+   Topological fidelity scores for synthetic data validation, designed to correlate with downstream clinical task utility.
 
 Architecture
 ------------
@@ -77,7 +117,7 @@ TRAILED has a layered design:
 .. mermaid::
 
    graph TB
-      subgraph "Core (dect)"
+      subgraph "Core"
          A["Direction sampling"]
          B["Filtration computation"]
          C["EC curve calculation"]
@@ -136,17 +176,17 @@ All              ``pip install trailed[all]``
 Use Cases
 ---------
 
-**Shape Classification**
-   Train classifiers on ECT descriptors to distinguish shape categories.
+**Synthetic Data Validation**
+   Compare topological structure of real and synthetic EHR cohorts to detect mode collapse and coverage gaps.
 
-**Shape Retrieval**
-   Find similar shapes in a database using ECT distance.
+**Training Regularization**
+   Use differentiable ECT as a loss term to steer generative models away from pathological solutions.
 
-**Generative Models**
-   Use differentiable ECT as a loss function for shape generation.
+**Patient Trajectory Analysis**
+   Characterize clinical pathways and identify anomalous trajectories in topological latent space.
 
-**Data Imputation**
-   Score imputation candidates by their topological properties (see :doc:`Phil <../../../phil/docs/source/index>`).
+**Representation Learning**
+   Extract topological features from longitudinal health records for downstream prediction tasks.
 
 Next Steps
 ----------
