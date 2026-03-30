@@ -142,17 +142,20 @@ def generate_ehr_polars(
 # Benchmark helpers
 # ---------------------------------------------------------------------------
 
+N_SEEDS = 10
+SEEDS = list(range(N_SEEDS))
+
 
 @dataclass
 class BenchmarkResult:
     name: str
-    time_ms: float
+    time_ms_mean: float
+    time_ms_std: float
     output_shape: tuple
-    output_mean: float
-    output_std: float
+    speedups: list[float] | None = None
 
 
-def _run_trailed(
+def _run_trailed_single(
     df: polars.DataFrame,
     coord_columns: list[str],
     group_column: str,
@@ -160,8 +163,8 @@ def _run_trailed(
     resolution: int,
     n_warmup: int = 2,
     n_runs: int = 5,
-) -> BenchmarkResult:
-    """Benchmark compute_ect_from_polars (vectorised Rust path, no torch needed)."""
+) -> tuple[float, tuple]:
+    """Single benchmark run, returns (avg_time_ms, output_shape)."""
     for _ in range(n_warmup):
         compute_ect_from_polars(
             df,
@@ -183,13 +186,36 @@ def _run_trailed(
         )
         times.append(time.perf_counter() - t0)
 
-    avg_ms = np.mean(times) * 1000
+    return np.mean(times) * 1000, tuple(out.shape)
+
+
+def _run_trailed(
+    n_patients: int,
+    visits_per_patient: int,
+    coord_columns: list[str],
+    group_column: str,
+    num_thetas: int,
+    resolution: int,
+    n_warmup: int = 2,
+    n_runs: int = 5,
+) -> BenchmarkResult:
+    """Benchmark over multiple seeds, returns aggregated results."""
+    times_ms = []
+    output_shape = None
+
+    for seed in SEEDS:
+        df = generate_ehr_polars(n_patients, visits_per_patient, seed=seed)
+        t_ms, shape = _run_trailed_single(
+            df, coord_columns, group_column, num_thetas, resolution, n_warmup, n_runs
+        )
+        times_ms.append(t_ms)
+        output_shape = shape
+
     return BenchmarkResult(
         name="trailed (Polars → Rust)",
-        time_ms=avg_ms,
-        output_shape=tuple(out.shape),
-        output_mean=float(out.mean()),
-        output_std=float(out.std()),
+        time_ms_mean=float(np.mean(times_ms)),
+        time_ms_std=float(np.std(times_ms)),
+        output_shape=output_shape,
     )
 
 
@@ -217,7 +243,7 @@ def _polars_to_torch(
     return points, batch
 
 
-def _run_upstream(
+def _run_upstream_single(
     df: polars.DataFrame,
     coord_columns: list[str],
     group_column: str,
@@ -225,13 +251,8 @@ def _run_upstream(
     resolution: int,
     n_warmup: int = 2,
     n_runs: int = 5,
-) -> BenchmarkResult:
-    """
-    Benchmark upstream dect package, including the Polars→torch conversion.
-
-    The conversion is included because it is mandatory overhead — upstream has
-    no DataFrame API and every real-world run starts from a DataFrame.
-    """
+) -> tuple[float, tuple]:
+    """Single benchmark run, returns (avg_time_ms, output_shape)."""
     ambient_dim = len(coord_columns)
     v = upstream_generate_directions(num_thetas, ambient_dim, seed=42, device="cpu")
     config = UpstreamECTConfig(
@@ -249,7 +270,6 @@ def _run_upstream(
             self.x = x
             self.batch = batch
 
-    # Warmup
     for _ in range(n_warmup):
         x, batch = _polars_to_torch(df, coord_columns, group_column)
         layer(MockBatch(x, batch))
@@ -257,20 +277,89 @@ def _run_upstream(
     times = []
     for _ in range(n_runs):
         t0 = time.perf_counter()
-        # Measure from Polars DataFrame — the realistic starting point
         x, batch = _polars_to_torch(df, coord_columns, group_column)
         out = layer(MockBatch(x, batch))
         times.append(time.perf_counter() - t0)
 
-    avg_ms = np.mean(times) * 1000
     out_np = out.detach().numpy()
+    return np.mean(times) * 1000, tuple(out_np.shape)
+
+
+def _run_upstream(
+    n_patients: int,
+    visits_per_patient: int,
+    coord_columns: list[str],
+    group_column: str,
+    num_thetas: int,
+    resolution: int,
+    n_warmup: int = 2,
+    n_runs: int = 5,
+) -> BenchmarkResult:
+    """Benchmark over multiple seeds, returns aggregated results."""
+    times_ms = []
+    output_shape = None
+
+    for seed in SEEDS:
+        df = generate_ehr_polars(n_patients, visits_per_patient, seed=seed)
+        t_ms, shape = _run_upstream_single(
+            df, coord_columns, group_column, num_thetas, resolution, n_warmup, n_runs
+        )
+        times_ms.append(t_ms)
+        output_shape = shape
+
     return BenchmarkResult(
         name="dect upstream (Polars → torch → ECTLayer)",
-        time_ms=avg_ms,
-        output_shape=tuple(out_np.shape),
-        output_mean=float(out_np.mean()),
-        output_std=float(out_np.std()),
+        time_ms_mean=float(np.mean(times_ms)),
+        time_ms_std=float(np.std(times_ms)),
+        output_shape=output_shape,
     )
+
+
+def _run_comparison(
+    n_patients: int,
+    visits_per_patient: int,
+    coord_columns: list[str],
+    group_column: str,
+    num_thetas: int,
+    resolution: int,
+) -> tuple[BenchmarkResult, BenchmarkResult]:
+    """Run both benchmarks over multiple seeds, compute per-seed speedups."""
+    trailed_times = []
+    upstream_times = []
+    output_shape_trailed = None
+    output_shape_upstream = None
+
+    for seed in SEEDS:
+        df = generate_ehr_polars(n_patients, visits_per_patient, seed=seed)
+
+        t_trailed, shape_t = _run_trailed_single(
+            df, coord_columns, group_column, num_thetas, resolution
+        )
+        t_upstream, shape_u = _run_upstream_single(
+            df, coord_columns, group_column, num_thetas, resolution
+        )
+
+        trailed_times.append(t_trailed)
+        upstream_times.append(t_upstream)
+        output_shape_trailed = shape_t
+        output_shape_upstream = shape_u
+
+    speedups = [u / t for t, u in zip(trailed_times, upstream_times)]
+
+    trailed = BenchmarkResult(
+        name="trailed (Polars → Rust)",
+        time_ms_mean=float(np.mean(trailed_times)),
+        time_ms_std=float(np.std(trailed_times)),
+        output_shape=output_shape_trailed,
+        speedups=speedups,
+    )
+    upstream = BenchmarkResult(
+        name="dect upstream (Polars → torch → ECTLayer)",
+        time_ms_mean=float(np.mean(upstream_times)),
+        time_ms_std=float(np.std(upstream_times)),
+        output_shape=output_shape_upstream,
+    )
+    return trailed, upstream
 
 
 def _print_comparison(
@@ -278,30 +367,34 @@ def _print_comparison(
     upstream: BenchmarkResult,
     title: str,
 ) -> None:
-    w = 76
+    w = 80
     print(f"\n{'=' * w}")
     print(f"  {title}")
+    print(f"  (averaged over {N_SEEDS} random seeds)")
     print(f"{'=' * w}")
-    print(f"{'Metric':<30} {'trailed (Rust)':<22} {'dect (upstream)':<22}")
+    print(f"{'Metric':<30} {'trailed (Rust)':<24} {'dect (upstream)':<24}")
     print(f"{'-' * w}")
-    print(
-        f"{'Total wall-clock (ms)':<30} {trailed.time_ms:<22.2f} {upstream.time_ms:<22.2f}"
-    )
+
+    trailed_str = f"{trailed.time_ms_mean:.2f} ± {trailed.time_ms_std:.2f}"
+    upstream_str = f"{upstream.time_ms_mean:.2f} ± {upstream.time_ms_std:.2f}"
+    print(f"{'Wall-clock (ms)':<30} {trailed_str:<24} {upstream_str:<24}")
     print(f"{'-' * w}")
-    speedup = upstream.time_ms / trailed.time_ms
-    if speedup >= 1:
-        print(f"  trailed is {speedup:.2f}x faster")
+
+    if trailed.speedups:
+        speedup_mean = float(np.mean(trailed.speedups))
+        speedup_std = float(np.std(trailed.speedups))
+        if speedup_mean >= 1:
+            print(f"  Speedup: {speedup_mean:.2f}x ± {speedup_std:.2f}x (trailed faster)")
+        else:
+            print(f"  Speedup: {1/speedup_mean:.2f}x ± {speedup_std:.2f}x (upstream faster)")
     else:
-        print(f"  upstream is {1/speedup:.2f}x faster")
-    print(
-        f"\n  Output shape : trailed={trailed.output_shape}, upstream={upstream.output_shape}"
-    )
-    print(
-        f"  Output mean  : trailed={trailed.output_mean:.4f}, upstream={upstream.output_mean:.4f}"
-    )
-    print(
-        f"  Output std   : trailed={trailed.output_std:.4f}, upstream={upstream.output_std:.4f}"
-    )
+        speedup = upstream.time_ms_mean / trailed.time_ms_mean
+        if speedup >= 1:
+            print(f"  Speedup: {speedup:.2f}x (trailed faster)")
+        else:
+            print(f"  Speedup: {1/speedup:.2f}x (upstream faster)")
+
+    print(f"\n  Output shape: trailed={trailed.output_shape}, upstream={upstream.output_shape}")
 
 
 # ---------------------------------------------------------------------------
@@ -473,6 +566,7 @@ class TestPolarsEHRBenchmark:
     """
     Wall-clock comparisons: trailed (Polars → Rust) vs. upstream dect package.
 
+    Each benchmark runs over 10 random seeds and reports mean ± std.
     The upstream timing includes the mandatory Polars → torch tensor conversion,
     because that overhead is real and unavoidable — the upstream package has no
     DataFrame integration.
@@ -481,58 +575,68 @@ class TestPolarsEHRBenchmark:
     @_UPSTREAM_SKIP
     def test_benchmark_small(self):
         """Small cohort: 20 patients × 50 visits (1 000 points)."""
-        df = generate_ehr_polars(n_patients=20, visits_per_patient=50)
-
-        trailed = _run_trailed(df, _ALL_FEATURES, "patient_id", num_thetas=32, resolution=32)
-        upstream = _run_upstream(df, _ALL_FEATURES, "patient_id", num_thetas=32, resolution=32)
-
+        trailed, upstream = _run_comparison(
+            n_patients=20,
+            visits_per_patient=50,
+            coord_columns=_ALL_FEATURES,
+            group_column="patient_id",
+            num_thetas=32,
+            resolution=32,
+        )
         _print_comparison(trailed, upstream, "Small cohort  — 20 patients × 50 visits, 10-D, 32×32")
 
     @_UPSTREAM_SKIP
     def test_benchmark_medium(self):
         """Medium cohort: 100 patients × 100 visits (10 000 points)."""
-        df = generate_ehr_polars(n_patients=100, visits_per_patient=100)
-
-        trailed = _run_trailed(df, _ALL_FEATURES, "patient_id", num_thetas=64, resolution=64)
-        upstream = _run_upstream(df, _ALL_FEATURES, "patient_id", num_thetas=64, resolution=64)
-
+        trailed, upstream = _run_comparison(
+            n_patients=100,
+            visits_per_patient=100,
+            coord_columns=_ALL_FEATURES,
+            group_column="patient_id",
+            num_thetas=64,
+            resolution=64,
+        )
         _print_comparison(trailed, upstream, "Medium cohort — 100 patients × 100 visits, 10-D, 64×64")
 
     @_UPSTREAM_SKIP
     def test_benchmark_large(self):
         """Large cohort: 500 patients × 200 visits (100 000 points)."""
-        df = generate_ehr_polars(n_patients=500, visits_per_patient=200)
-
-        trailed = _run_trailed(df, _ALL_FEATURES, "patient_id", num_thetas=64, resolution=64)
-        upstream = _run_upstream(df, _ALL_FEATURES, "patient_id", num_thetas=64, resolution=64)
-
+        trailed, upstream = _run_comparison(
+            n_patients=500,
+            visits_per_patient=200,
+            coord_columns=_ALL_FEATURES,
+            group_column="patient_id",
+            num_thetas=64,
+            resolution=64,
+        )
         _print_comparison(trailed, upstream, "Large cohort  — 500 patients × 200 visits, 10-D, 64×64")
 
     @_UPSTREAM_SKIP
     def test_benchmark_labs_only(self):
         """5-D lab-only feature set."""
-        df = generate_ehr_polars(n_patients=100, visits_per_patient=100)
-
-        trailed = _run_trailed(df, _LAB_COLUMNS, "patient_id", num_thetas=32, resolution=32)
-        upstream = _run_upstream(df, _LAB_COLUMNS, "patient_id", num_thetas=32, resolution=32)
-
+        trailed, upstream = _run_comparison(
+            n_patients=100,
+            visits_per_patient=100,
+            coord_columns=_LAB_COLUMNS,
+            group_column="patient_id",
+            num_thetas=32,
+            resolution=32,
+        )
         _print_comparison(trailed, upstream, "Labs only     — 100 patients × 100 visits,  5-D, 32×32")
 
     @_UPSTREAM_SKIP
     def test_benchmark_high_resolution(self):
         """High-resolution ECT on a mid-sized cohort."""
-        df = generate_ehr_polars(n_patients=50, visits_per_patient=100)
-
-        trailed = _run_trailed(df, _ALL_FEATURES, "patient_id", num_thetas=128, resolution=128)
-        upstream = _run_upstream(df, _ALL_FEATURES, "patient_id", num_thetas=128, resolution=128)
-
+        trailed, upstream = _run_comparison(
+            n_patients=50,
+            visits_per_patient=100,
+            coord_columns=_ALL_FEATURES,
+            group_column="patient_id",
+            num_thetas=128,
+            resolution=128,
+        )
         _print_comparison(trailed, upstream, "High-res      — 50 patients × 100 visits, 10-D, 128×128")
 
 
-def main():
-    """Entry point for `trailed-benchmark` CLI and `uv run benchmark`."""
-    pytest.main([__file__, "-v", "-s"])
-
-
 if __name__ == "__main__":
-    main()
+    pytest.main([__file__, "-v", "-s"])
