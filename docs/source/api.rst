@@ -12,7 +12,7 @@ API Reference
       :class-card: intro-card
       :shadow: md
 
-      Core dect exports, samplers, and helpers.
+      Core trailed exports, samplers, and helpers.
 
       +++
       .. button-ref:: trailed-api
@@ -25,7 +25,7 @@ API Reference
       :class-card: intro-card
       :shadow: md
 
-      Optional sklearn/torch/tabular integration modules.
+      Optional sklearn and tabular integration modules.
 
       +++
       .. button-ref:: trailed-integrations

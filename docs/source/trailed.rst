@@ -7,8 +7,3 @@ Trailed API
    :members:
    :undoc-members:
    :show-inheritance:
-
-.. automodule:: dect
-   :members:
-   :undoc-members:
-   :show-inheritance:

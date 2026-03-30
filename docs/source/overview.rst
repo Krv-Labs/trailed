@@ -98,7 +98,7 @@ Roadmap
 TRAILED is being developed in phases:
 
 **Current: ECT Foundation**
-   Fast, differentiable ECT computation with NumPy, sklearn, and PyTorch integrations. This is the building block for healthcare-specific methods.
+   Fast ECT computation with NumPy, sklearn, and tabular (pandas/polars) integrations. This is the building block for healthcare-specific methods. For PyTorch use cases, see the upstream `aidos-lab/dect <https://github.com/aidos-lab/DECT>`_ package.
 
 **Planned: Density-Aware Descriptors**
    Extensions that fuse topological structure with local density information, addressing limitations of standard ECT for statistical inference.
@@ -130,7 +130,6 @@ TRAILED has a layered design:
 
       subgraph "Plugins (optional)"
          F["sklearn transformer"]
-         G["PyTorch layer"]
       end
 
       A --> B
@@ -138,7 +137,6 @@ TRAILED has a layered design:
       C --> D
       C --> E
       D --> F
-      D --> G
 
       style A fill:#D9EDF7,stroke:#31708F,stroke-width:2px
       style B fill:#D9EDF7,stroke:#31708F,stroke-width:2px
@@ -169,8 +167,9 @@ Framework        Installation
 =============== =====================================================
 NumPy/pandas     ``pip install trailed`` (included)
 sklearn          ``pip install trailed[sklearn]``
-PyTorch          ``pip install trailed[torch]``
+pandas/polars    ``pip install trailed[dataframe]``
 All              ``pip install trailed[all]``
+PyTorch          ``pip install dect`` (upstream package)
 =============== =====================================================
 
 Use Cases
@@ -193,4 +192,4 @@ Next Steps
 
 - :ref:`Quickstart <quickstart>` - Compute your first descriptor
 - :ref:`User Guide <user_guide>` - Detailed configuration
-- :ref:`Integrations <integrations>` - sklearn and PyTorch adapters
+- :ref:`Integrations <integrations>` - sklearn and tabular adapters

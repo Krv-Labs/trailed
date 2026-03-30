@@ -15,7 +15,7 @@ TRAILED is a topological representation learning library for Electronic Health R
 Quick Links
 -----------
 
-.. grid:: 1 2 3 3
+.. grid:: 1 2 2 4
    :gutter: 3
    :padding: 2 2 0 0
 
@@ -42,6 +42,14 @@ Quick Links
       :shadow: md
 
       Full API documentation for TRAILED modules.
+
+   .. grid-item-card:: :octicon:`graph` Benchmarks
+      :link: benchmarks
+      :link-type: ref
+      :class-card: intro-card
+      :shadow: md
+
+      Performance comparison: trailed vs. upstream dect.
 
 Why TRAILED?
 ------------
@@ -112,13 +120,15 @@ Example Usage
    patient_embeddings = np.load("embeddings.npy")
    descriptor = compute_ect_from_numpy(patient_embeddings, num_thetas=32, resolution=64)
 
-**Training Regularization**
+**Training Regularization (PyTorch)**
+
+For PyTorch neural network use cases, use the upstream `aidos-lab/dect <https://github.com/aidos-lab/DECT>`_ package:
 
 .. code-block:: python
 
-   from trailed.torch import EctLayer, EctConfig
+   from dect.nn import ECTLayer, ECTConfig
 
-   ect_layer = EctLayer(EctConfig(num_thetas=32, resolution=32))
+   ect_layer = ECTLayer(ECTConfig(num_thetas=32, resolution=32))
 
    # Regularize generative model to preserve topological structure
    real_topo = ect_layer(real_batch)
@@ -149,8 +159,14 @@ With optional dependencies:
 .. code-block:: bash
 
    uv pip install trailed[sklearn]     # sklearn integration
-   uv pip install trailed[torch]       # PyTorch integration
+   uv pip install trailed[dataframe]   # pandas/polars integration
    uv pip install trailed[all]         # everything
+
+For PyTorch use cases, install the upstream dect package:
+
+.. code-block:: bash
+
+   pip install dect @ git+https://github.com/aidos-lab/DECT/
 
 Or with pip:
 
@@ -192,6 +208,7 @@ Next Steps
    user_guide
    configuration
    integrations
+   benchmarks
 
 References
 ----------
