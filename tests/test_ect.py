@@ -3,7 +3,7 @@
 import numpy as np
 
 import trailed_rust
-from dect.sampling import generate_lin
+from trailed.sampling import generate_lin
 
 
 class TestEctPointsForward:

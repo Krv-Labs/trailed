@@ -7,7 +7,7 @@ import pytest
 class TestEctTransformer:
     @pytest.fixture
     def transformer(self):
-        from dect.plugins.sklearn import EctTransformer
+        from trailed.plugins.sklearn import EctTransformer
 
         return EctTransformer(
             num_thetas=16,
@@ -39,7 +39,7 @@ class TestEctTransformer:
         assert features.shape == (10, 16 * 16)
 
     def test_unflatten(self):
-        from dect.plugins.sklearn import EctTransformer
+        from trailed.plugins.sklearn import EctTransformer
 
         transformer = EctTransformer(
             num_thetas=16,
@@ -53,7 +53,7 @@ class TestEctTransformer:
         assert features.shape == (10, 16, 16)
 
     def test_normalized(self):
-        from dect.plugins.sklearn import EctTransformer
+        from trailed.plugins.sklearn import EctTransformer
 
         transformer = EctTransformer(
             num_thetas=16,
@@ -69,7 +69,7 @@ class TestEctTransformer:
         assert np.all(features >= 0.0 - 1e-5)
 
     def test_different_dimensions(self):
-        from dect.plugins.sklearn import EctTransformer
+        from trailed.plugins.sklearn import EctTransformer
 
         for d in [2, 3, 5]:
             transformer = EctTransformer(num_thetas=16, resolution=16)
@@ -108,7 +108,7 @@ class TestEctTransformer:
 class TestFastEctTransformer:
     @pytest.fixture
     def transformer(self):
-        from dect.plugins.sklearn import FastEctTransformer
+        from trailed.plugins.sklearn import FastEctTransformer
 
         return FastEctTransformer(
             num_thetas=32,
@@ -123,7 +123,7 @@ class TestFastEctTransformer:
         assert features.shape == (10, 32 * 32)
 
     def test_unflatten(self):
-        from dect.plugins.sklearn import FastEctTransformer
+        from trailed.plugins.sklearn import FastEctTransformer
 
         transformer = FastEctTransformer(
             num_thetas=32,
@@ -140,7 +140,7 @@ class TestFastEctTransformer:
 class TestEctChannelTransformer:
     @pytest.fixture
     def transformer(self):
-        from dect.plugins.sklearn import EctChannelTransformer
+        from trailed.plugins.sklearn import EctChannelTransformer
 
         return EctChannelTransformer(
             num_thetas=16,
@@ -159,7 +159,7 @@ class TestEctChannelTransformer:
         assert features.shape == (10, 16 * 16 * 3)
 
     def test_unflatten(self):
-        from dect.plugins.sklearn import EctChannelTransformer
+        from trailed.plugins.sklearn import EctChannelTransformer
 
         transformer = EctChannelTransformer(
             num_thetas=16,
@@ -176,7 +176,7 @@ class TestEctChannelTransformer:
         assert features.shape == (10, 16, 16, 3)
 
     def test_infer_channels(self):
-        from dect.plugins.sklearn import EctChannelTransformer
+        from trailed.plugins.sklearn import EctChannelTransformer
 
         transformer = EctChannelTransformer(
             num_thetas=16,
