@@ -73,11 +73,5 @@ exclude = [
 ]
 
 
-[[tool.uv.index]]
-name = "research"
-url = "https://api.pyx.dev/simple/krv/research"
-publish-url = "https://api.pyx.dev/v1/upload/krv/research"
-explicit=true
-
 [tool.uv.sources]
 dect = { git = "https://github.com/aidos-lab/DECT/" }
