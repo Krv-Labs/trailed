@@ -11,7 +11,7 @@ uv pip install trailed
 
 # Optional extras
 uv pip install trailed[sklearn]      # scikit-learn transformers
-uv pip install trailed[torch]        # PyTorch layers
+uv pip install trailed[dataframe]    # pandas/polars support
 uv pip install trailed[all]          # all dependencies
 ```
 
@@ -26,9 +26,10 @@ ect = compute_ect_from_numpy(patient_embeddings, num_thetas=32, resolution=32)
 
 ```python
 # PyTorch — differentiable for use as training regularizer
-from trailed.torch import EctLayer, EctConfig
+# Use the upstream dect package for PyTorch support
+from dect.nn import ECTLayer, ECTConfig
 
-layer = EctLayer(EctConfig(num_thetas=32, resolution=32))
+layer = ECTLayer(ECTConfig(num_thetas=32, resolution=32))
 ect = layer(data)  # gradients flow through
 ```
 
