@@ -16,13 +16,6 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-torch = [
-    "torch>=2.0",
-]
-torch-geometric = [
-    "torch>=2.0",
-    "torch_geometric>=2.0",
-]
 sklearn = [
     "scikit-learn>=1.0",
 ]
@@ -31,8 +24,6 @@ dataframe = [
     "polars>=0.20",
 ]
 all = [
-    "torch>=2.0",
-    "torch_geometric>=2.0",
     "scikit-learn>=1.0",
     "pandas>=1.5",
     "polars>=0.20",
@@ -41,14 +32,13 @@ all = [
 [dependency-groups]
 tests = [
     "ruff>=0.15.7",
-    "dect @ git+https://github.com/aidos-lab/DECT/",
     "pandas>=1.5",
     "polars",
     "pytest",
     "pytest-cov",
-    "torch>=2.0",
     "scikit-learn>=1.0",
-    "torch-geometric>=2.7.0",
+    "torch>=2.0",
+    "dect",
 ]
 docs = [
     "sphinx>=7.4,<9",
@@ -62,13 +52,13 @@ docs = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-python_files = ["test_*.py", "compare.py", "benchmark.py"]
+python_files = ["test_*.py"]
 
 
 [tool.maturin]
 features = ["pyo3/extension-module"]
 module-name = "trailed_rust"
-python-packages = ["dect", "trailed"]
+python-packages = ["trailed"]
 exclude = [
     "tests/**",
     ".github/**",
@@ -88,3 +78,6 @@ name = "research"
 url = "https://api.pyx.dev/simple/krv/research"
 publish-url = "https://api.pyx.dev/v1/upload/krv/research"
 explicit=true
+
+[tool.uv.sources]
+dect = { git = "https://github.com/aidos-lab/DECT/" }
