@@ -23,7 +23,7 @@ import pytest
 
 polars = pytest.importorskip("polars")
 
-from trailed.tabular import compute_ect_from_polars, compute_ect_from_numpy
+from trailed.tabular import compute_ect_from_polars, compute_ect_from_numpy  # noqa: E402
 
 
 # ---------------------------------------------------------------------------
