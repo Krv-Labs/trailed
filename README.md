@@ -20,17 +20,23 @@ uv pip install trailed[all]          # all dependencies
 ```python
 from trailed import compute_ect_from_numpy
 
-# Compute topological descriptor
-ect = compute_ect_from_numpy(patient_embeddings, num_thetas=32, resolution=32)
+ect = compute_ect_from_numpy(points, num_thetas=32, resolution=32)
 ```
 
 ```python
-# PyTorch — differentiable for use as training regularizer
-# Use the upstream dect package for PyTorch support
-from dect.nn import ECTLayer, ECTConfig
+import polars as pl
+from trailed.tabular import compute_ect_from_polars
 
-layer = ECTLayer(ECTConfig(num_thetas=32, resolution=32))
-ect = layer(data)  # gradients flow through
+df = pl.DataFrame({"x": [0.1, 0.2, 0.3], "y": [0.1, 0.3, 0.2], "group": [0, 0, 1]})
+ect = compute_ect_from_polars(df, coord_columns=["x", "y"], group_column="group")
+```
+
+```python
+import pandas as pd
+from trailed.tabular import compute_ect_from_pandas
+
+df = pd.DataFrame({"x": [0.1, 0.2, 0.3], "y": [0.1, 0.3, 0.2], "group": [0, 0, 1]})
+ect = compute_ect_from_pandas(df, coord_columns=["x", "y"], group_column="group")
 ```
 
 ## Documentation
