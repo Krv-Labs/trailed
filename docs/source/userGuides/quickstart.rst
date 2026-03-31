@@ -101,10 +101,10 @@ Use ECT features in machine learning pipelines:
 
    from sklearn.pipeline import Pipeline
    from sklearn.svm import SVC
-   from trailed.sklearn import ECTTransformer
+   from trailed.plugins.sklearn import EctTransformer
 
    pipe = Pipeline([
-       ("ect", ECTTransformer(num_thetas=32, resolution=64)),
+       ("ect", EctTransformer(num_thetas=32, resolution=64)),
        ("clf", SVC()),
    ])
 
@@ -119,14 +119,18 @@ Use ECT features in machine learning pipelines:
 PyTorch Integration
 -------------------
 
-For differentiable ECT in deep learning — useful as a training-time regularizer:
+For differentiable ECT in PyTorch deep learning workflows, use the upstream `aidos-lab/dect <https://github.com/aidos-lab/DECT>`_ package:
+
+.. code-block:: bash
+
+   pip install dect @ git+https://github.com/aidos-lab/DECT/
 
 .. code-block:: python
 
    import torch
-   from trailed.torch import EctLayer, EctConfig
+   from dect.nn import ECTLayer, ECTConfig
 
-   ect_layer = EctLayer(EctConfig(num_thetas=32, resolution=64))
+   ect_layer = ECTLayer(ECTConfig(num_thetas=32, resolution=64))
 
    # Input: batch of point clouds [B, N, D]
    point_clouds = torch.randn(8, 100, 64, requires_grad=True)
@@ -151,10 +155,6 @@ For differentiable ECT in deep learning — useful as a training-time regularize
    topo_loss = torch.nn.functional.mse_loss(generated_ect, real_ect)
    total_loss = reconstruction_loss + lambda_topo * topo_loss
 
-.. note::
-
-   PyTorch integration requires ``uv pip install trailed[torch]``.
-
 Tuning Parameters
 -----------------
 
@@ -177,4 +177,4 @@ Next Steps
 - :doc:`programmatic` - Advanced API usage
 - :doc:`intermediate` - Direction sampling strategies
 - :doc:`advanced` - Custom filtrations and optimization
-- :ref:`Integrations <integrations>` - sklearn and PyTorch details
+- :ref:`Integrations <integrations>` - sklearn and tabular integration details

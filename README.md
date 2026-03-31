@@ -11,7 +11,7 @@ uv pip install trailed
 
 # Optional extras
 uv pip install trailed[sklearn]      # scikit-learn transformers
-uv pip install trailed[torch]        # PyTorch layers
+uv pip install trailed[dataframe]    # pandas/polars support
 uv pip install trailed[all]          # all dependencies
 ```
 
@@ -20,18 +20,28 @@ uv pip install trailed[all]          # all dependencies
 ```python
 from trailed import compute_ect_from_numpy
 
-# Compute topological descriptor
-ect = compute_ect_from_numpy(patient_embeddings, num_thetas=32, resolution=32)
+ect = compute_ect_from_numpy(points, num_thetas=32, resolution=32)
 ```
 
 ```python
-# PyTorch — differentiable for use as training regularizer
-from trailed.torch import EctLayer, EctConfig
+import polars as pl
+from trailed.tabular import compute_ect_from_polars
 
-layer = EctLayer(EctConfig(num_thetas=32, resolution=32))
-ect = layer(data)  # gradients flow through
+df = pl.DataFrame({"x": [0.1, 0.2, 0.3], "y": [0.1, 0.3, 0.2], "group": [0, 0, 1]})
+ect = compute_ect_from_polars(df, coord_columns=["x", "y"], group_column="group")
 ```
 
+```python
+import pandas as pd
+from trailed.tabular import compute_ect_from_pandas
+
+df = pd.DataFrame({"x": [0.1, 0.2, 0.3], "y": [0.1, 0.3, 0.2], "group": [0, 0, 1]})
+ect = compute_ect_from_pandas(df, coord_columns=["x", "y"], group_column="group")
+```
+
+## Documentation
+
+Full documentation: [krv-analytics.github.io/trailed](https://krv-analytics.github.io/trailed/)
 
 ## Acknowledgment
 

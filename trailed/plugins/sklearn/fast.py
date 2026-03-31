@@ -11,7 +11,7 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
 import trailed_rust
-from dect.sampling import generate_directions as _generate_directions_func
+from trailed.sampling import generate_directions as _generate_directions_func
 
 
 class FastEctTransformer:
@@ -38,7 +38,7 @@ class FastEctTransformer:
 
     Examples
     --------
-    >>> from dect.plugins.sklearn import FastEctTransformer
+    >>> from trailed.plugins.sklearn import FastEctTransformer
     >>> import numpy as np
     >>> X = np.random.randn(100, 50, 3).astype(np.float32)
     >>> transformer = FastEctTransformer(num_thetas=64, resolution=64)

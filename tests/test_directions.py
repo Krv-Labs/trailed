@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from dect.sampling import (
+from trailed.sampling import (
     generate_uniform_directions,
     generate_2d_directions,
     generate_multiview_directions,

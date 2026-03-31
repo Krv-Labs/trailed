@@ -27,9 +27,14 @@ TRAILED supports optional integrations:
 .. code-block:: bash
 
    uv pip install trailed[sklearn]      # scikit-learn transformers
-   uv pip install trailed[torch]        # PyTorch layers
    uv pip install trailed[dataframe]    # pandas + polars support
    uv pip install trailed[all]          # all optional dependencies
+
+For PyTorch neural network use cases, use the upstream `aidos-lab/dect <https://github.com/aidos-lab/DECT>`_ package:
+
+.. code-block:: bash
+
+   pip install dect @ git+https://github.com/aidos-lab/DECT/
 
 Development Installation
 ------------------------
@@ -47,7 +52,6 @@ Editable install with extras:
 .. code-block:: bash
 
    uv pip install -e .[sklearn]
-   uv pip install -e .[torch]
    uv pip install -e .[dataframe]
 
 Requirements

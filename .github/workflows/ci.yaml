@@ -30,7 +30,7 @@ jobs:
         run: uv run pytest
       - name: Run ruff lint checks
         if: matrix.python-version == '3.13'
-        run: uvx ruff check dect tests
+        run: uvx ruff check trailed tests
       - name: Run ruff format checks
         if: matrix.python-version == '3.13'
-        run: uvx ruff format --check dect
+        run: uvx ruff format --check trailed

@@ -1,25 +1,25 @@
 """
-ECT transformer with channel support for categorical features.
+Sklearn-compatible transformer for ECT computation.
 
-This module provides a transformer that computes separate ECTs for each
-categorical channel in the point cloud.
+This module provides the standard EctTransformer class for computing
+differentiable ECT features from point clouds.
 """
 
 from typing import Literal, Optional
 
 import numpy as np
+import trailed_rust
 from numpy.typing import ArrayLike, NDArray
 
-import trailed_rust
-from dect.sampling import generate_directions as _generate_directions_func
+from trailed.sampling import generate_directions as _generate_directions_func
 
 
-class EctChannelTransformer:
-    """ECT transformer with channel support for categorical features.
+class EctTransformer:
+    """Sklearn-compatible transformer for computing ECT features.
 
-    This transformer computes separate ECTs for each categorical channel
-    in the point cloud, useful for molecules with different atom types
-    or other categorically-labeled point clouds.
+    This transformer computes the Euler Characteristic Transform for
+    batches of point clouds, producing fixed-size feature vectors
+    suitable for machine learning classifiers.
 
     Parameters
     ----------
@@ -28,29 +28,38 @@ class EctChannelTransformer:
     resolution : int, default=64
         Number of threshold steps.
     radius : float, default=1.0
-        Radius of the threshold interval.
+        Radius of the threshold interval [-radius, radius].
     scale : float, default=500.0
         Scale factor for sigmoid approximation.
-    max_channels : int or None, default=None
-        Maximum number of channels. If None, inferred from data.
     sampling_method : str, default="uniform"
-        Method for generating directions.
+        Method for generating directions. One of "uniform",
+        "structured_2d", "multiview", "spherical_grid".
     flatten : bool, default=True
         If True, flatten the ECT to a 1D feature vector.
     normalized : bool, default=False
         If True, normalize each ECT to [0, 1].
+    parallel : bool, default=True
+        If True, use parallel computation.
     seed : int, default=42
         Random seed for direction generation.
 
+    Attributes
+    ----------
+    directions_ : ndarray of shape (ambient_dim, num_thetas)
+        The direction vectors used for ECT computation.
+    ambient_dim_ : int
+        Inferred ambient dimension from training data.
+
     Examples
     --------
-    >>> from dect.plugins.sklearn import EctChannelTransformer
+    >>> from trailed.plugins.sklearn import EctTransformer
     >>> import numpy as np
-    >>> # Point clouds with channel labels
+    >>> # Create sample point clouds: 10 samples, 50 points each, 3D
     >>> X = np.random.randn(10, 50, 3).astype(np.float32)
-    >>> channels = np.random.randint(0, 3, size=(10, 50))  # 3 channels
-    >>> transformer = EctChannelTransformer(max_channels=3)
-    >>> features = transformer.fit_transform(X, channels=channels)
+    >>> transformer = EctTransformer(num_thetas=32, resolution=32)
+    >>> features = transformer.fit_transform(X)
+    >>> features.shape
+    (10, 1024)  # 32 * 32 = 1024 features per sample
     """
 
     def __init__(
@@ -59,28 +68,27 @@ class EctChannelTransformer:
         resolution: int = 64,
         radius: float = 1.0,
         scale: float = 500.0,
-        max_channels: Optional[int] = None,
         sampling_method: Literal[
             "uniform", "structured_2d", "multiview", "spherical_grid"
         ] = "uniform",
         flatten: bool = True,
         normalized: bool = False,
+        parallel: bool = True,
         seed: int = 42,
     ):
         self.num_thetas = num_thetas
         self.resolution = resolution
         self.radius = radius
         self.scale = scale
-        self.max_channels = max_channels
         self.sampling_method = sampling_method
         self.flatten = flatten
         self.normalized = normalized
+        self.parallel = parallel
         self.seed = seed
 
         self.directions_: Optional[NDArray] = None
         self.ambient_dim_: Optional[int] = None
         self._lin: Optional[NDArray] = None
-        self.n_channels_: Optional[int] = None
 
     def _generate_directions(self, ambient_dim: int) -> NDArray:
         """Generate direction vectors."""
@@ -88,13 +96,8 @@ class EctChannelTransformer:
             self.num_thetas, ambient_dim, self.sampling_method, self.seed
         )
 
-    def fit(
-        self,
-        X: ArrayLike,
-        y=None,
-        channels: Optional[ArrayLike] = None,
-    ) -> "EctChannelTransformer":
-        """Fit the transformer.
+    def fit(self, X: ArrayLike, y=None) -> "EctTransformer":
+        """Fit the transformer by generating directions.
 
         Parameters
         ----------
@@ -102,8 +105,11 @@ class EctChannelTransformer:
             Training point clouds.
         y : None
             Ignored.
-        channels : array-like of shape (n_samples, n_points), optional
-            Channel indices for each point.
+
+        Returns
+        -------
+        self
+            The fitted transformer.
         """
         X = np.asarray(X, dtype=np.float32)
 
@@ -116,34 +122,21 @@ class EctChannelTransformer:
         self.directions_ = self._generate_directions(self.ambient_dim_)
         self._lin = trailed_rust.generate_lin(self.radius, self.resolution)
 
-        if self.max_channels is not None:
-            self.n_channels_ = self.max_channels
-        elif channels is not None:
-            channels = np.asarray(channels, dtype=np.int64)
-            self.n_channels_ = int(np.max(channels)) + 1
-        else:
-            self.n_channels_ = 1
-
         return self
 
-    def transform(
-        self,
-        X: ArrayLike,
-        channels: Optional[ArrayLike] = None,
-    ) -> NDArray:
+    def transform(self, X: ArrayLike) -> NDArray:
         """Transform point clouds to ECT features.
 
         Parameters
         ----------
         X : array-like of shape (n_samples, n_points, n_dims)
             Point clouds to transform.
-        channels : array-like of shape (n_samples, n_points)
-            Channel indices for each point.
 
         Returns
         -------
         features : ndarray
-            ECT features with shape depending on flatten parameter.
+            ECT features. Shape is (n_samples, resolution * num_thetas) if
+            flatten=True, else (n_samples, resolution, num_thetas).
         """
         if self.directions_ is None:
             raise RuntimeError("Transformer not fitted. Call fit() first.")
@@ -155,48 +148,69 @@ class EctChannelTransformer:
                 f"Expected 3D array (n_samples, n_points, n_dims), got {X.ndim}D"
             )
 
+        if X.shape[2] != self.ambient_dim_:
+            raise ValueError(f"Expected {self.ambient_dim_}D points, got {X.shape[2]}D")
+
         n_samples = X.shape[0]
         n_points = X.shape[1]
 
-        if channels is None:
-            channels = np.zeros((n_samples, n_points), dtype=np.int64)
-        else:
-            channels = np.asarray(channels, dtype=np.int64)
-
-        results = []
-
-        for i in range(n_samples):
-            points = X[i]
-            ch = channels[i]
-            nh = points @ self.directions_
-            batch = np.zeros(n_points, dtype=np.int64)
-
-            ect = trailed_rust.compute_ect_channels_forward(
-                nh, batch, ch, self._lin, 1, self.n_channels_, self.scale
+        if self.parallel:
+            # Batched computation in Rust across all samples.
+            ects = trailed_rust.compute_ect_batch_parallel(
+                X,
+                self.directions_,
+                self.radius,
+                self.resolution,
+                self.scale,
             )
 
-            ect = ect[0]  # Remove batch dimension
-
             if self.normalized:
-                ect = ect / (np.max(ect) + 1e-8)
+                # Normalize each sample independently.
+                max_per_sample = np.max(ects, axis=(1, 2), keepdims=True)
+                ects = ects / (max_per_sample + 1e-8)
+        else:
+            # Non-parallel path: preserve original per-sample behavior.
+            results = []
 
-            results.append(ect)
+            for i in range(n_samples):
+                points = X[i]
+                nh = points @ self.directions_
+                batch = np.zeros(n_points, dtype=np.int64)
 
-        ects = np.stack(results, axis=0)
+                ect = trailed_rust.compute_ect_points_forward(
+                    nh, batch, self._lin, 1, self.scale
+                )
+
+                ect = ect[0]  # Remove batch dimension
+
+                if self.normalized:
+                    ect = ect / (np.max(ect) + 1e-8)
+
+                results.append(ect)
+
+            ects = np.stack(results, axis=0)
 
         if self.flatten:
             return ects.reshape(n_samples, -1)
 
         return ects
 
-    def fit_transform(
-        self,
-        X: ArrayLike,
-        y=None,
-        channels: Optional[ArrayLike] = None,
-    ) -> NDArray:
-        """Fit and transform in one step."""
-        return self.fit(X, y, channels=channels).transform(X, channels=channels)
+    def fit_transform(self, X: ArrayLike, y=None) -> NDArray:
+        """Fit and transform in one step.
+
+        Parameters
+        ----------
+        X : array-like of shape (n_samples, n_points, n_dims)
+            Point clouds to fit and transform.
+        y : None
+            Ignored.
+
+        Returns
+        -------
+        features : ndarray
+            ECT features.
+        """
+        return self.fit(X, y).transform(X)
 
     def get_params(self, deep: bool = True) -> dict:
         """Get parameters for this estimator."""
@@ -205,23 +219,23 @@ class EctChannelTransformer:
             "resolution": self.resolution,
             "radius": self.radius,
             "scale": self.scale,
-            "max_channels": self.max_channels,
             "sampling_method": self.sampling_method,
             "flatten": self.flatten,
             "normalized": self.normalized,
+            "parallel": self.parallel,
             "seed": self.seed,
         }
 
-    def set_params(self, **params) -> "EctChannelTransformer":
+    def set_params(self, **params) -> "EctTransformer":
         """Set parameters for this estimator."""
         for key, value in params.items():
             if not hasattr(self, key):
                 raise ValueError(f"Invalid parameter: {key}")
             setattr(self, key, value)
 
+        # Reset fitted state if parameters changed
         self.directions_ = None
         self.ambient_dim_ = None
         self._lin = None
-        self.n_channels_ = None
 
         return self

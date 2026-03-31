@@ -39,7 +39,7 @@ def generate_uniform_directions(
 
     Examples
     --------
-    >>> from dect.sampling import generate_uniform_directions
+    >>> from trailed.sampling import generate_uniform_directions
     >>> v = generate_uniform_directions(64, 3)
     >>> v.shape
     (3, 64)
@@ -67,7 +67,7 @@ def generate_2d_directions(num_thetas: int) -> NDArray:
 
     Examples
     --------
-    >>> from dect.sampling import generate_2d_directions
+    >>> from trailed.sampling import generate_2d_directions
     >>> v = generate_2d_directions(8)
     >>> v.shape
     (2, 8)
@@ -99,7 +99,7 @@ def generate_multiview_directions(
 
     Examples
     --------
-    >>> from dect.sampling import generate_multiview_directions
+    >>> from trailed.sampling import generate_multiview_directions
     >>> v = generate_multiview_directions(64, 3)
     >>> v.shape
     (3, 64)
@@ -131,7 +131,7 @@ def generate_spherical_grid_directions(
 
     Examples
     --------
-    >>> from dect.sampling import generate_spherical_grid_directions
+    >>> from trailed.sampling import generate_spherical_grid_directions
     >>> v = generate_spherical_grid_directions(8, 16)
     >>> v.shape
     (3, 128)
@@ -175,7 +175,7 @@ def generate_directions(
 
     Examples
     --------
-    >>> from dect.sampling import generate_directions
+    >>> from trailed.sampling import generate_directions
     >>> v = generate_directions(64, 3, method="uniform")
     >>> v.shape
     (3, 64)

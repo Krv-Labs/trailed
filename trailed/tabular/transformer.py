@@ -10,7 +10,7 @@ from typing import List, Literal, Optional, Union
 import trailed_rust
 from numpy.typing import NDArray
 
-from dect.sampling import generate_directions as _generate_directions
+from trailed.sampling import generate_directions as _generate_directions
 
 from .utils import compute_ect_from_dataframe, ect_to_dataframe
 
@@ -61,7 +61,7 @@ class DataFrameEctTransformer:
     Examples
     --------
     >>> import pandas as pd
-    >>> from dect.tabular import DataFrameEctTransformer
+    >>> from trailed.tabular import DataFrameEctTransformer
     >>> df = pd.DataFrame({
     ...     "x": np.random.randn(100),
     ...     "y": np.random.randn(100),

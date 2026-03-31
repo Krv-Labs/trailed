@@ -46,4 +46,3 @@ html_css_files = ["custom.css"]
 html_js_files = ["logo-link.js"]
 
 nbsphinx_allow_errors = True
-autodoc_mock_imports = ["torch"]

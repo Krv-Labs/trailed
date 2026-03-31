@@ -11,7 +11,7 @@ import numpy as np
 import trailed_rust
 from numpy.typing import NDArray
 
-from dect.sampling import generate_directions as _generate_directions
+from trailed.sampling import generate_directions as _generate_directions
 
 
 def compute_ect_from_numpy(

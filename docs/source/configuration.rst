@@ -3,9 +3,9 @@ Configuration
 =============
 
 TRAILED currently relies on package defaults and class constructors exported by
-:mod:`dect` and plugin modules.
+:mod:`trailed` and plugin modules.
 
-.. automodule:: dect
+.. automodule:: trailed
    :members:
    :undoc-members:
    :show-inheritance:

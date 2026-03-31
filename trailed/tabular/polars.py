@@ -73,7 +73,7 @@ def compute_ect_from_polars(
     Examples
     --------
     >>> import polars as pl
-    >>> from dect.tabular import compute_ect_from_polars
+    >>> from trailed.tabular import compute_ect_from_polars
     >>> df = pl.DataFrame({
     ...     "x": [0.1, 0.2, 0.3, 0.5, 0.6, 0.7],
     ...     "y": [0.1, 0.3, 0.2, 0.4, 0.5, 0.6],
