@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "trailed"
-version = "0.1.0"
+version = "0.1.1"
 authors = [
     { name="Krv Labs", email="team@krv.ai" },
 ]
@@ -38,7 +38,6 @@ tests = [
     "pytest-cov",
     "scikit-learn>=1.0",
     "torch>=2.0",
-    "dect",
 ]
 docs = [
     "sphinx>=7.4,<9",
@@ -73,5 +72,3 @@ exclude = [
 ]
 
 
-[tool.uv.sources]
-dect = { git = "https://github.com/aidos-lab/DECT/" }
