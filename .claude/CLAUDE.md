@@ -16,15 +16,11 @@ uv pip install -e .
 # Rebuild the Rust extension after changes to src/lib.rs
 maturin develop
 
-# Install test dependencies (includes the upstream 'dect' package for comparison)
+# Install test dependencies
 uv sync --group tests
 
-# Run all tests (use -s to see the benchmark table printed to stdout)
-uv run pytest -s tests/test_dect.py
-
-# Run a single test
-uv run pytest -s tests/test_dect.py::test_compare_with_original
-uv run pytest -s tests/test_dect.py::test_compare_with_original[faces]
+# Run all tests
+uv run pytest tests/
 ```
 
 ## Architecture
@@ -38,14 +34,10 @@ This is a **Rust-backed Python package** built with [maturin](https://github.com
 - Exposes 8 `#[pyfunction]`s covering forward+backward for: `points`, `points_derivative`, `edges`, `faces`.
 - Edge ECT = points − max(edge endpoints). Face ECT = points − edges + max(face vertices). Backward pass tracks `argmax` to route gradients correctly.
 
-**Python layer (`dect/ect.py` → importable as `dect`)**
-- `EctConfig`: frozen dataclass with fields `num_thetas`, `bump_steps`, `R`, `ect_type`, `device`, `num_features`, `normalized`.
-- `EctLayer(nn.Module)`: projects node features via `data.x @ V` (shape `[N, num_thetas]`), then calls the appropriate `torch.autograd.Function` subclass, which converts tensors to numpy, calls the Rust functions, and converts back.
-- Four `torch.autograd.Function` subclasses: `EctPointsFunction`, `EctPointsDerivativeFunction`, `EctEdgesFunction`, `EctFacesFunction`.
-
-### Import disambiguation
-
-`conftest.py` ensures `import dect` resolves to the **local** `dect/` package (this repo) rather than the upstream pip-installed `dect` package. The test file imports both as `dect_rust_pkg` (local) and `dect_orig_mod` (upstream) for comparison.
+**Python layer (`trailed/` package)**
+- `sampling/`: direction generation and utility functions (wrapping Rust implementations)
+- `tabular/`: DataFrame-based ECT computation for pandas/polars
+- `plugins/sklearn/`: scikit-learn transformers for ECT-based feature engineering
 
 ### Key numeric details
 - `ecc_factor = 50.0` for all standard functions; `100.0` for `points_derivative`.
