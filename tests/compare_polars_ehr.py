@@ -230,9 +230,7 @@ def _polars_to_torch(
     This is the glue code a user must write when using the upstream dect
     package, which has no DataFrame integration.
     """
-    points = torch.from_numpy(
-        df.select(coord_columns).to_numpy().astype(np.float32)
-    )
+    points = torch.from_numpy(df.select(coord_columns).to_numpy().astype(np.float32))
 
     patient_series = df.get_column(group_column)
     unique_patients = patient_series.unique().sort().to_list()
@@ -384,17 +382,23 @@ def _print_comparison(
         speedup_mean = float(np.mean(trailed.speedups))
         speedup_std = float(np.std(trailed.speedups))
         if speedup_mean >= 1:
-            print(f"  Speedup: {speedup_mean:.2f}x ± {speedup_std:.2f}x (trailed faster)")
+            print(
+                f"  Speedup: {speedup_mean:.2f}x ± {speedup_std:.2f}x (trailed faster)"
+            )
         else:
-            print(f"  Speedup: {1/speedup_mean:.2f}x ± {speedup_std:.2f}x (upstream faster)")
+            print(
+                f"  Speedup: {1 / speedup_mean:.2f}x ± {speedup_std:.2f}x (upstream faster)"
+            )
     else:
         speedup = upstream.time_ms_mean / trailed.time_ms_mean
         if speedup >= 1:
             print(f"  Speedup: {speedup:.2f}x (trailed faster)")
         else:
-            print(f"  Speedup: {1/speedup:.2f}x (upstream faster)")
+            print(f"  Speedup: {1 / speedup:.2f}x (upstream faster)")
 
-    print(f"\n  Output shape: trailed={trailed.output_shape}, upstream={upstream.output_shape}")
+    print(
+        f"\n  Output shape: trailed={trailed.output_shape}, upstream={upstream.output_shape}"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -462,7 +466,10 @@ class TestPolarsEHRWorkflow:
         )
 
         np.testing.assert_allclose(
-            ect_polars, ect_numpy, rtol=1e-5, atol=1e-6,
+            ect_polars,
+            ect_numpy,
+            rtol=1e-5,
+            atol=1e-6,
             err_msg="Polars and numpy paths diverged",
         )
 
@@ -583,7 +590,9 @@ class TestPolarsEHRBenchmark:
             num_thetas=32,
             resolution=32,
         )
-        _print_comparison(trailed, upstream, "Small cohort  — 20 patients × 50 visits, 10-D, 32×32")
+        _print_comparison(
+            trailed, upstream, "Small cohort  — 20 patients × 50 visits, 10-D, 32×32"
+        )
 
     @_UPSTREAM_SKIP
     def test_benchmark_medium(self):
@@ -596,7 +605,9 @@ class TestPolarsEHRBenchmark:
             num_thetas=64,
             resolution=64,
         )
-        _print_comparison(trailed, upstream, "Medium cohort — 100 patients × 100 visits, 10-D, 64×64")
+        _print_comparison(
+            trailed, upstream, "Medium cohort — 100 patients × 100 visits, 10-D, 64×64"
+        )
 
     @_UPSTREAM_SKIP
     def test_benchmark_large(self):
@@ -609,7 +620,9 @@ class TestPolarsEHRBenchmark:
             num_thetas=64,
             resolution=64,
         )
-        _print_comparison(trailed, upstream, "Large cohort  — 500 patients × 200 visits, 10-D, 64×64")
+        _print_comparison(
+            trailed, upstream, "Large cohort  — 500 patients × 200 visits, 10-D, 64×64"
+        )
 
     @_UPSTREAM_SKIP
     def test_benchmark_labs_only(self):
@@ -622,7 +635,9 @@ class TestPolarsEHRBenchmark:
             num_thetas=32,
             resolution=32,
         )
-        _print_comparison(trailed, upstream, "Labs only     — 100 patients × 100 visits,  5-D, 32×32")
+        _print_comparison(
+            trailed, upstream, "Labs only     — 100 patients × 100 visits,  5-D, 32×32"
+        )
 
     @_UPSTREAM_SKIP
     def test_benchmark_high_resolution(self):
@@ -635,7 +650,9 @@ class TestPolarsEHRBenchmark:
             num_thetas=128,
             resolution=128,
         )
-        _print_comparison(trailed, upstream, "High-res      — 50 patients × 100 visits, 10-D, 128×128")
+        _print_comparison(
+            trailed, upstream, "High-res      — 50 patients × 100 visits, 10-D, 128×128"
+        )
 
 
 if __name__ == "__main__":
