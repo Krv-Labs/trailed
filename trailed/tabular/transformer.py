@@ -39,6 +39,8 @@ class DataFrameEctTransformer:
         Column name for group/batch IDs.
     channel_column : str, optional
         Column name for channel IDs.
+    edge_index : ndarray of shape (2, n_edges), optional
+        Index pairs describing edges between rows of the input DataFrame.
     num_thetas : int, default=64
         Number of directions.
     resolution : int, default=64
@@ -82,6 +84,7 @@ class DataFrameEctTransformer:
         coord_columns: List[str],
         group_column: Optional[str] = None,
         channel_column: Optional[str] = None,
+        edge_index: Optional[NDArray] = None,
         num_thetas: int = 64,
         resolution: int = 64,
         radius: float = 1.0,
@@ -95,6 +98,7 @@ class DataFrameEctTransformer:
         self.coord_columns = coord_columns
         self.group_column = group_column
         self.channel_column = channel_column
+        self.edge_index = edge_index
         self.num_thetas = num_thetas
         self.resolution = resolution
         self.radius = radius
@@ -153,6 +157,7 @@ class DataFrameEctTransformer:
             coord_columns=self.coord_columns,
             group_column=self.group_column,
             channel_column=self.channel_column,
+            edge_index=self.edge_index,
             num_thetas=self.num_thetas,
             resolution=self.resolution,
             radius=self.radius,

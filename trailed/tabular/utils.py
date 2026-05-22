@@ -35,6 +35,8 @@ def compute_ect_from_dataframe(
         Column name for group/batch IDs.
     channel_column : str, optional
         Column name for channel IDs.
+    edge_index : ndarray of shape (2, n_edges), optional
+        Index pairs describing edges between rows of the input DataFrame.
     **kwargs
         Additional arguments passed to compute_ect_from_numpy.
 
