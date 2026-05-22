@@ -25,6 +25,7 @@ def compute_ect_from_polars(
     coord_columns: List[str],
     group_column: Optional[str] = None,
     channel_column: Optional[str] = None,
+    edge_index: Optional[NDArray] = None,
     num_thetas: int = 64,
     resolution: int = 64,
     radius: float = 1.0,
@@ -48,6 +49,8 @@ def compute_ect_from_polars(
         Column name for group/batch IDs.
     channel_column : str, optional
         Column name for channel IDs.
+    edge_index : ndarray of shape (2, n_edges), optional
+        Index pairs describing edges between rows of ``df``.
     num_thetas : int, default=64
         Number of directions.
     resolution : int, default=64
@@ -85,6 +88,13 @@ def compute_ect_from_polars(
     ...     coord_columns=["x", "y", "z"],
     ...     group_column="molecule_id",
     ... )
+    >>> # Compute graph ECT
+    >>> edge_index = np.array([[0, 1], [1, 2]], dtype=np.int64)
+    >>> ect_graph = compute_ect_from_polars(
+    ...     df,
+    ...     coord_columns=["x", "y", "z"],
+    ...     edge_index=edge_index,
+    ... )
     """
     if not HAS_POLARS:
         raise ImportError(
@@ -118,6 +128,7 @@ def compute_ect_from_polars(
         points=points,
         group_ids=group_ids,
         channel_ids=channel_ids,
+        edge_index=edge_index,
         num_thetas=num_thetas,
         resolution=resolution,
         radius=radius,

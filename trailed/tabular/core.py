@@ -18,6 +18,7 @@ def compute_ect_from_numpy(
     points: NDArray,
     group_ids: Optional[NDArray] = None,
     channel_ids: Optional[NDArray] = None,
+    edge_index: Optional[NDArray] = None,
     num_thetas: int = 64,
     resolution: int = 64,
     radius: float = 1.0,
@@ -39,7 +40,12 @@ def compute_ect_from_numpy(
         Group/batch indices for each point. Points with the same group_id
         belong to the same point cloud.
     channel_ids : ndarray of shape (n_points,), optional
-        Channel indices for each point (e.g., atom types).
+        Channel indices for each point (e.g., atom types). Mutually exclusive
+        with ``edge_index``.
+    edge_index : ndarray of shape (2, n_edges), optional
+        Index pairs describing 1-simplices (edges) between rows of ``points``.
+        When supplied, the returned ECT is the full V - E Euler characteristic
+        transform of the graph rather than the point-cloud ECT.
     num_thetas : int, default=64
         Number of directions.
     resolution : int, default=64
@@ -55,7 +61,8 @@ def compute_ect_from_numpy(
     normalized : bool, default=False
         Whether to normalize the ECT.
     parallel : bool, default=True
-        Whether to use parallel computation.
+        Whether to use parallel computation. Ignored when ``edge_index`` is
+        supplied (edge ECT currently has a single sequential implementation).
 
     Returns
     -------
@@ -64,6 +71,7 @@ def compute_ect_from_numpy(
         - No groups, no channels: (resolution, num_thetas)
         - With groups, no channels: (n_groups, resolution, num_thetas)
         - With channels: (n_groups, num_thetas, resolution, n_channels)
+        - With edge_index: same shape rules as the no-channels case.
     """
     points = np.asarray(points, dtype=np.float32)
 
@@ -102,7 +110,20 @@ def compute_ect_from_numpy(
         dim_size = int(batch.max()) + 1
 
     # Compute ECT
-    if channel_ids is not None:
+    if edge_index is not None and channel_ids is not None:
+        raise NotImplementedError(
+            "edge_index combined with channel_ids is not supported; "
+            "the Rust core has no channelled edge-ECT kernel."
+        )
+
+    if edge_index is not None:
+        ei = np.ascontiguousarray(np.asarray(edge_index, dtype=np.int64))
+        if ei.ndim != 2 or ei.shape[0] != 2:
+            raise ValueError(f"edge_index must have shape (2, n_edges), got {ei.shape}")
+        ect = trailed_rust.compute_ect_edges_forward(
+            nh, batch, ei, lin, dim_size, scale
+        )
+    elif channel_ids is not None:
         channels = np.asarray(channel_ids, dtype=np.int64)
         max_channels = int(channels.max()) + 1
 

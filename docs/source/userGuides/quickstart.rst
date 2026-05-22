@@ -68,6 +68,23 @@ TRAILED works directly with pandas:
 
    descriptor = compute_ect_from_pandas(df, num_thetas=32, resolution=64)
 
+Graph ECT with edge_index
+-------------------------
+
+TRAILED supports computing the full $V - E$ Euler Characteristic Transform for graph-structured data. When an ``edge_index`` is supplied, the descriptor accounts for both node and edge contributions.
+
+.. code-block:: python
+
+   import numpy as np
+   from trailed import compute_ect_from_numpy
+
+   # Nodes and edges (e.g., a simple triangle)
+   points = np.array([[0, 0], [1, 0], [0, 1]], dtype=np.float32)
+   edge_index = np.array([[0, 1, 2], [1, 2, 0]], dtype=np.int64)
+
+   # Compute graph-aware ECT
+   ect = compute_ect_from_numpy(points, edge_index=edge_index)
+
 Comparing Cohorts
 -----------------
 

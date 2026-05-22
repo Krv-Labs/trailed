@@ -120,6 +120,24 @@ Example Usage
    patient_embeddings = np.load("embeddings.npy")
    descriptor = compute_ect_from_numpy(patient_embeddings, num_thetas=32, resolution=64)
 
+**Analyzing Patient Graphs**
+
+.. code-block:: python
+
+   import pandas as pd
+   from trailed import compute_ect_from_pandas
+
+   # Patient features and their relationships (e.g., k-NN or clinical similarity)
+   df = pd.read_csv("patients.csv")
+   edge_index = np.load("patient_graph_edges.npy")
+
+   # Compute V - E graph ECT descriptor
+   graph_descriptor = compute_ect_from_pandas(
+       df,
+       coord_columns=["age", "bmi", "hba1c"],
+       edge_index=edge_index
+   )
+
 **Training Regularization (PyTorch)**
 
 For PyTorch neural network use cases, use the upstream `aidos-lab/dect <https://github.com/aidos-lab/DECT>`_ package:
