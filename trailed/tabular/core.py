@@ -119,9 +119,7 @@ def compute_ect_from_numpy(
     if edge_index is not None:
         ei = np.ascontiguousarray(np.asarray(edge_index, dtype=np.int64))
         if ei.ndim != 2 or ei.shape[0] != 2:
-            raise ValueError(
-                f"edge_index must have shape (2, n_edges), got {ei.shape}"
-            )
+            raise ValueError(f"edge_index must have shape (2, n_edges), got {ei.shape}")
         ect = trailed_rust.compute_ect_edges_forward(
             nh, batch, ei, lin, dim_size, scale
         )
