@@ -83,6 +83,61 @@ class TestComputeEctFromNumpy:
 
         assert ect.max() <= 1.0 + 1e-5
 
+    def test_with_edge_index(self):
+        points = np.random.randn(50, 3).astype(np.float32)
+        n_edges = 40
+        edge_index = np.stack(
+            [
+                np.random.randint(0, 50, n_edges),
+                np.random.randint(0, 50, n_edges),
+            ]
+        ).astype(np.int64)
+
+        ect = compute_ect_from_numpy(
+            points,
+            edge_index=edge_index,
+            num_thetas=16,
+            resolution=16,
+        )
+
+        assert ect.shape == (16, 16)
+
+    def test_with_edge_index_grouped(self):
+        points = np.random.randn(60, 3).astype(np.float32)
+        group_ids = np.repeat(np.arange(3), 20)
+        edge_index = np.array(
+            [[0, 1, 20, 21, 40, 41], [1, 2, 21, 22, 41, 42]], dtype=np.int64
+        )
+
+        ect = compute_ect_from_numpy(
+            points,
+            group_ids=group_ids,
+            edge_index=edge_index,
+            num_thetas=16,
+            resolution=16,
+        )
+
+        assert ect.shape == (3, 16, 16)
+
+    def test_edge_index_with_channels_raises(self):
+        points = np.random.randn(20, 3).astype(np.float32)
+        channel_ids = np.random.randint(0, 2, 20)
+        edge_index = np.array([[0, 1], [1, 2]], dtype=np.int64)
+
+        with pytest.raises(NotImplementedError):
+            compute_ect_from_numpy(
+                points,
+                channel_ids=channel_ids,
+                edge_index=edge_index,
+            )
+
+    def test_edge_index_validates_shape(self):
+        points = np.random.randn(10, 3).astype(np.float32)
+        bad_edge_index = np.array([0, 1, 2], dtype=np.int64)
+
+        with pytest.raises(ValueError, match="shape"):
+            compute_ect_from_numpy(points, edge_index=bad_edge_index)
+
 
 class TestPandasIntegration:
     @pytest.fixture
