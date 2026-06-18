@@ -128,3 +128,44 @@ def test_transformer_graph_ect():
 
     ect = transformer.fit_transform(df)
     assert ect.shape == (2, 8, 8)
+
+
+def test_graph_ect_normalization():
+    """Verify that graph ECT (with negative values) is correctly normalized to [-1, 1]."""
+    n_points = 10
+    n_edges = 20  # More edges than points ensures negative Euler characteristics
+
+    points = np.random.randn(n_points, 3).astype(np.float32)
+    edge_index = np.array(
+        [
+            np.random.randint(0, n_points, n_edges),
+            np.random.randint(0, n_points, n_edges),
+        ],
+        dtype=np.int64,
+    )
+
+    # Filter out self-loops
+    mask = edge_index[0] != edge_index[1]
+    edge_index = edge_index[:, mask]
+
+    # Compute normalized graph ECT
+    ect = compute_ect_from_numpy(
+        points,
+        edge_index=edge_index,
+        num_thetas=8,
+        resolution=16,
+        normalized=True,
+    )
+
+    # Check bounds
+    assert np.all(ect <= 1.0 + 1e-5)
+    assert np.all(ect >= -1.0 - 1e-5)
+
+    # Ensure that it actually has both positive and negative values (highly likely for V - E when E is dense)
+    # and that the maximum absolute value is exactly 1.0 (within float tolerance)
+    max_abs = np.max(np.abs(ect))
+    assert np.allclose(max_abs, 1.0, atol=1e-5)
+    
+    # Check that there are indeed negative values (or at least some negative values if the graph structure permits)
+    assert np.any(ect < 0.0)
+

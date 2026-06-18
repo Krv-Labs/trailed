@@ -28,6 +28,9 @@ jobs:
       - name: Run tests
         if: matrix.python-version != '3.13'
         run: uv run pytest
+      - name: Run Rust tests
+        if: matrix.python-version == '3.12'
+        run: cargo test
       - name: Run ruff lint checks
         if: matrix.python-version == '3.13'
         run: uvx ruff check trailed tests

@@ -148,9 +148,9 @@ def compute_ect_from_numpy(
     # Normalize if requested
     if normalized:
         if channel_ids is not None:
-            ect = ect / (np.max(ect, axis=(-1, -2), keepdims=True) + 1e-8)
+            ect = ect / (np.max(np.abs(ect), axis=(-1, -2), keepdims=True) + 1e-8)
         else:
-            ect = ect / (np.max(ect, axis=(1, 2), keepdims=True) + 1e-8)
+            ect = ect / (np.max(np.abs(ect), axis=(1, 2), keepdims=True) + 1e-8)
 
     # Remove batch dimension if single group
     if group_ids is None:

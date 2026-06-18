@@ -178,7 +178,7 @@ class EctChannelTransformer:
             ect = ect[0]  # Remove batch dimension
 
             if self.normalized:
-                ect = ect / (np.max(ect) + 1e-8)
+                ect = ect / (np.max(np.abs(ect)) + 1e-8)
 
             results.append(ect)
 
