@@ -7,14 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.1.2] - 2026-06-18
+## [0.1.3] - 2026-06-18
 
 ### Added
-- **Graph ECT Support:** Added the ability to compute full V - E Euler Characteristic Transforms for graph data by exposing `edge_index` across numpy, pandas, and polars computation interfaces (`compute_ect_from_numpy`, `compute_ect_from_pandas`, and `compute_ect_from_polars`).
 - **Graph ECT Normalization Verification Test:** Added `test_graph_ect_normalization` inside `tests/test_graph_ect.py` to assert that normalized graph ECTs with negative values are appropriately bounded and scaled.
 
 ### Fixed
 - **Principled ECT Normalization:** Upgraded the `normalized=True` functionality across `EctTransformer`, `EctChannelTransformer`, and core tabular APIs to use **Max Absolute Value** normalization (`np.max(np.abs(ect))`) instead of standard maximum division. This correctly bounds graph ECT values within `[-1, 1]` while remaining 100% backwards-compatible with standard non-negative point cloud ECTs (mapping them to `[0, 1]`).
+
+---
+
+## [0.1.2] - 2026-05-22
+
+### Added
+- **Graph ECT Support:** Added the ability to compute full V - E Euler Characteristic Transforms for graph data by exposing `edge_index` across numpy, pandas, and polars computation interfaces (`compute_ect_from_numpy`, `compute_ect_from_pandas`, and `compute_ect_from_polars`).
 
 ---
 
