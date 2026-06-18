@@ -166,7 +166,7 @@ class EctTransformer:
 
             if self.normalized:
                 # Normalize each sample independently.
-                max_per_sample = np.max(ects, axis=(1, 2), keepdims=True)
+                max_per_sample = np.max(np.abs(ects), axis=(1, 2), keepdims=True)
                 ects = ects / (max_per_sample + 1e-8)
         else:
             # Non-parallel path: preserve original per-sample behavior.
@@ -184,7 +184,7 @@ class EctTransformer:
                 ect = ect[0]  # Remove batch dimension
 
                 if self.normalized:
-                    ect = ect / (np.max(ect) + 1e-8)
+                    ect = ect / (np.max(np.abs(ect)) + 1e-8)
 
                 results.append(ect)
 
