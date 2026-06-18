@@ -82,6 +82,7 @@ class TestComputeEctFromNumpy:
         )
 
         assert ect.max() <= 1.0 + 1e-5
+        assert ect.min() >= -1.0 - 1e-5
 
     def test_with_edge_index(self):
         points = np.random.randn(50, 3).astype(np.float32)
