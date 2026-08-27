@@ -41,7 +41,7 @@ ect = compute_ect_from_pandas(df, coord_columns=["x", "y"], group_column="group"
 
 ## Documentation
 
-Full documentation: [krv-analytics.github.io/trailed](https://krv-analytics.github.io/trailed/)
+Full documentation: [docs.krv.ai/trailed/](https://docs.krv.ai/trailed/)
 
 ## Acknowledgment
 
